@@ -19,13 +19,19 @@ export const COLLECTIONS = [
     ]
   },
   {
+    id: 'aero-collection',
+    name: 'AERO COLLECTION',
+    products: [
+      { name: 'ETERNITY PROTOCOL - WHITE BASE', sku: 'ARO-OTOW-EP16-WHT', price: '730', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg' },
+      { name: 'ETERNITY PROTOCOL - NAVY BLUE', sku: 'ARO-OTOW-EP16-NVY', price: '730', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg' }
+    ]
+  },
+  {
     id: 'light-gear',
     name: 'LIGHT GEAR',
     products: [
       { name: 'BLACK FLUX ZIP HOODIE', price: '1,300 - 1,700', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c56c3913bcproductimage699c03358e600.jpg' },
-      { name: 'BLACK FLUX SWEATPANTS', price: '900 - 1,400', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699d9bbb7e5f1productimage699c03358e601.jpg' },
-      { name: 'MAVERICK CODE ZIP HOODIE', price: '1,400 - 1,800', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c57e9557ffproductimage699c03358e603.jpg' },
-      { name: 'LIGHT CODE SWEATPANTS', price: '900 - 1,300', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699d9be7c3129productimage699c03358e605.jpg' }
+      { name: 'BLACK FLUX SWEATPANTS', price: '900 - 1,400', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699d9bbb7e5f1productimage699c03358e601.jpg' }
     ]
   },
   {
@@ -33,31 +39,12 @@ export const COLLECTIONS = [
     name: 'MANIFESTO',
     products: [
       { name: 'THE SOVEREIGN HOODIE', price: '1,500 - 1,900', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69b54062cb422productimage6995933b34e69.png' },
-      { name: 'THE ANTHEM HOODIE', price: '1,500 - 1,900', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69b19e7dbdea7productimage699c03358e5ed.jpg' },
-      { name: 'THE DECREE HOODIE', price: '1,500 - 1,900', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69b0cd8ca5e1cproductimage699c03358e5f2.jpg' },
-      { name: 'HIGH TIDE HOODIE', price: '1,400 - 1,800', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c4ff03868cproductimage699c03358e5f5.jpg' },
-      { name: 'BLUE AUTHORITY HOODIE', price: '1,400 - 1,800', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c508680247productimage699c03358e5f7.jpg' }
-    ]
-  },
-  {
-    id: 'aero-collection',
-    name: 'AERO COLLECTION',
-    products: [
-      { 
-        name: 'ETERNITY PROTOCOL', 
-        sku: 'ARO-OTOW-EP16',
-        price: '730', 
-        image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg' 
-      },
-      { 
-        name: 'AERO TECH PIECE', 
-        sku: 'ARO-OTOW-TECH',
-        price: '730', 
-        image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg' 
-      }
+      { name: 'THE ANTHEM HOODIE', price: '1,500 - 1,900', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69b19e7dbdea7productimage699c03358e5ed.jpg' }
     ]
   }
 ];
+
+export const MANIFESTO_TEXT = "Sway Maverick rejects the ordinary, mastering the art of scarcity through unique drops and rare silhouettes. Local, Loud, and Limitless.";
 
 export const CONTACT_LINKS = {
   whatsapp: "https://api.whatsapp.com/send?phone=201033866838",
