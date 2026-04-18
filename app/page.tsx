@@ -22,13 +22,17 @@ export default function Home() {
         <a href={CONTACT_LINKS.whatsapp} target="_blank" className="text-[10px] uppercase tracking-widest bg-white text-black px-6 py-2.5 rounded-full font-[900] hover:scale-105 transition">Order via WhatsApp</a>
       </nav>
 
-      {/* TABS */}
-      <div className="pt-28 px-6 flex gap-8 overflow-x-auto no-scrollbar border-b border-white/5 sticky top-0 bg-black z-40">
+ {/* TABS - UPDATED TO PREMIUM BUTTONS */}
+      <div className="pt-28 px-6 flex gap-3 overflow-x-auto no-scrollbar border-b border-white/5 sticky top-0 bg-black z-40 pb-6">
         {COLLECTIONS.map(col => (
           <button 
             key={col.id}
             onClick={() => setActiveTab(col.id)}
-            className={`pb-4 text-[11px] font-[900] uppercase tracking-[0.3em] transition-all whitespace-nowrap ${activeTab === col.id ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-zinc-600'}`}
+            className={`px-6 py-3 rounded-full text-[11px] font-[900] uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap border-2 ${
+              activeTab === col.id 
+                ? 'bg-cyan-400 border-cyan-400 text-black shadow-[0_0_20px_rgba(0,245,255,0.3)]' 
+                : 'bg-transparent border-white/10 text-zinc-500 hover:border-white/30'
+            }`}
           >
             {col.name}
           </button>
