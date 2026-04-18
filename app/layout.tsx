@@ -1,8 +1,8 @@
 import './globals.css'
+import React from 'react'
 
 export const metadata = {
-  title: 'Sway Studio | Virtual Try-On',
-  description: 'Premium Streetwear Fitting Room',
+  title: 'Sway Studio',
 }
 
 export default function RootLayout({
@@ -12,7 +12,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+      </body>
     </html>
   )
 }
