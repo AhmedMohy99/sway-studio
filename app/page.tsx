@@ -1,104 +1,44 @@
-'use client'
-import { useState, useEffect } from 'react'
-import { COLLECTIONS, CONTACT_LINKS } from '@/lib/products'
-import TryOnEngine from '@/components/TryOnEngine'
+export const COLLECTIONS = [
+  {
+    id: 'urban-fossils',
+    name: 'Urban Fossils',
+    products: [
+      { name: 'Charcoal Black Rogue Relic Hoodie', price: '1500', oldPrice: '1900', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69b19f852d887productimage699c03358e5fa.jpg' },
+      { name: 'Ice Blue Rogue Relic Hoodie', price: '1500', oldPrice: '1900', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c55ab75572productimage699c03358e5fc.jpg' },
+      { name: 'Dust Rose Rogue Relic Hoodie', price: '1500', oldPrice: '1900', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c5654e26ecproductimage699c03358e5fe.jpg' }
+    ]
+  },
+  {
+    id: 'colours-explosion',
+    name: 'Colours Explosion',
+    products: [
+      { name: 'Maverick Phoenix Set - WHITE', price: '2400', oldPrice: '2800', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69aa5b1956607productimage69a4f7b8adae6.png' },
+      { name: 'Maverick Phoenix Hoodie', price: '1400', oldPrice: '1800', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69ac482151071productimage69a5d9cc657ab.jpg' },
+      { name: 'Maverick Phoenix Set - BLACK', price: '2400', oldPrice: '2800', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69a4eb6cc4c0dproductimage69a4eb2b29665.jpg' },
+      { name: 'Spectrum Explosion Hoodie', price: '1400', oldPrice: '1800', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69b0a37015ff1productimage699c03358e5f8.jpg' }
+    ]
+  },
+  {
+    id: 'aero-collection',
+    name: 'AERO Collection',
+    products: [
+      { name: 'Eternity Protocol - White Base', price: '730', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg' },
+      { name: 'Eternity Protocol - Navy Blue', price: '730', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg' }
+    ]
+  },
+  {
+    id: 'light-gear',
+    name: 'Light Gear',
+    products: [
+      { name: 'Black Flux Zip Hoodie', price: '1300', oldPrice: '1700', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c56c3913bcproductimage699c03358e600.jpg' },
+      { name: 'Black Flux Sweatpants', price: '900', oldPrice: '1400', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699d9bbb7e5f1productimage699c03358e601.jpg' },
+      { name: 'Maverick Code Zip Hoodie', price: '1400', oldPrice: '1800', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c57e9557ffproductimage699c03358e603.jpg' }
+    ]
+  }
+];
 
-export default function Home() {
-  const [activeTab, setActiveTab] = useState(COLLECTIONS[0].id)
-  const [selectedProduct, setSelectedProduct] = useState<any>(null)
-  const [activeImage, setActiveImage] = useState('')
-  const [selectedSize, setSelectedSize] = useState('L')
-  const [isTryOnOpen, setIsTryOnOpen] = useState(false)
-
-  useEffect(() => {
-    const col = COLLECTIONS.find(c => c.id === activeTab)
-    if (col) {
-      setSelectedProduct(col.products[0])
-      setActiveImage(col.products[0].image)
-    }
-  }, [activeTab])
-
-  if (!selectedProduct) return null
-
-  return (
-    <main className="min-h-screen bg-black text-white font-sans selection:bg-cyan-400">
-      {/* 1. BRAND HEADER */}
-      <nav className="fixed top-0 w-full z-50 bg-black/95 backdrop-blur-xl border-b border-white/5 p-8 flex justify-between items-center px-12">
-        <h1 className="text-2xl font-[1000] italic tracking-tighter text-cyan-400 leading-none">SWAY STUDIO</h1>
-        <div className="hidden md:flex gap-10 text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">
-          <a href={CONTACT_LINKS.instagram} target="_blank">Instagram</a>
-          <a href={CONTACT_LINKS.facebook} target="_blank">Facebook</a>
-          <span>Size Guide</span>
-        </div>
-      </nav>
-
-      {/* 2. COLLECTION SELECTOR */}
-      <div className="pt-28 px-12 pb-6 flex gap-4 overflow-x-auto no-scrollbar border-b border-white/5 sticky top-0 bg-black z-40">
-        {COLLECTIONS.map(col => (
-          <button 
-            key={col.id}
-            onClick={() => setActiveTab(col.id)}
-            className={`px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border-2 ${
-              activeTab === col.id ? 'bg-cyan-400 border-cyan-400 text-black shadow-lg shadow-cyan-400/30' : 'border-white/10 text-zinc-600 hover:border-white/30'
-            }`}
-          >
-            {col.name}
-          </button>
-        ))}
-      </div>
-
-      {/* 3. PRODUCT VIEW */}
-      <div className="grid lg:grid-cols-2 min-h-[80vh]">
-        <div className="p-12 border-r border-white/5 flex flex-col items-center justify-center relative group">
-          <div className="aspect-[3/4] w-full max-w-lg rounded-[40px] overflow-hidden bg-zinc-950 border border-white/10 relative">
-            <img src={activeImage} className="w-full h-full object-cover" alt="Sway Drop" />
-            <button onClick={() => setIsTryOnOpen(true)} className="absolute bottom-10 left-10 right-10 bg-cyan-400 text-black py-5 rounded-full text-[11px] font-[1000] uppercase tracking-[0.4em] shadow-xl">
-              Virtual Fitting Engine
-            </button>
-          </div>
-        </div>
-
-        <div className="p-20 flex flex-col justify-center">
-          <h2 className="text-6xl font-[1000] italic tracking-tighter uppercase mb-4 leading-none">{selectedProduct.name}</h2>
-          <p className="font-[1000] text-4xl italic text-white mb-10">EGP {selectedProduct.price}</p>
-
-          <div className="mb-10">
-            <p className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.3em] mb-4">In this collection:</p>
-            <div className="flex gap-4">
-              {COLLECTIONS.find(c => c.id === activeTab)?.products.map((p: any, i: number) => (
-                <button key={i} onClick={() => { setSelectedProduct(p); setActiveImage(p.image); }} className={`w-20 h-24 rounded-2xl overflow-hidden border-2 transition-all ${selectedProduct.name === p.name ? 'border-cyan-400' : 'border-white/5 opacity-40'}`}>
-                  <img src={p.image} className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-12">
-            <p className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.3em] mb-4">Size Selection:</p>
-            <div className="flex gap-3">
-              {['S', 'M', 'L', 'XL', '2XL'].map(s => (
-                <button key={s} onClick={() => setSelectedSize(s)} className={`w-14 h-14 flex items-center justify-center border-2 rounded-xl text-sm font-black transition-all ${selectedSize === s ? 'border-[#FF00FF] text-[#FF00FF] shadow-[0_0_15px_rgba(255,0,255,0.2)]' : 'border-white/10 text-zinc-600'}`}>
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <a href={`${CONTACT_LINKS.whatsapp}&text=PREORDER: ${selectedProduct.name} | SIZE: ${selectedSize}`} className="w-full bg-white text-black py-6 rounded-full text-xs font-[1000] uppercase tracking-[0.4em] text-center hover:bg-cyan-400 transition-colors">
-            Secure Limited Preorder
-          </a>
-        </div>
-      </div>
-
-      {/* AI MODAL */}
-      {isTryOnOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/98 backdrop-blur-3xl flex flex-col items-center justify-center p-6">
-          <button onClick={() => setIsTryOnOpen(false)} className="absolute top-10 right-10 text-zinc-500 uppercase text-[10px] font-black tracking-widest border border-white/10 px-6 py-2 rounded-full">✕ Close</button>
-          <div className="w-full max-w-lg">
-            <TryOnEngine itemUrl={activeImage} />
-          </div>
-        </div>
-      )}
-    </main>
-  )
-}
+export const CONTACT_LINKS = {
+  whatsapp: "https://api.whatsapp.com/send?phone=201033866838",
+  instagram: "https://www.instagram.com/swaymaverick",
+  facebook: "https://www.facebook.com/profile.php?id=61587128586975"
+};
