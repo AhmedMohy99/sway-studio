@@ -13,10 +13,26 @@ export const COLLECTIONS = [
     name: 'Colours Explosion',
     products: [
       { name: 'Maverick Phoenix Hoodie', price: 1400, image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-null,h-null//products/696e0bcb55259/69ac482151071productimage69a5d9cc657ab.jpg' },
-      { name: 'Spectrum Explosion Hoodie', price: 1400, image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-null,h-null//products/696e0bcb55259/69b0a37015ff1productimage699c03358e5f8.jpg' }
+      { name: 'Spectrum Explosion Hoodie', price: 1400, image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-null,h-null//products/696e0bcb55259/69b0a37015ff1productimage699c03358e5f8.jpg' },
+      { name: 'Maverick Phoenix Set (White)', price: 2400, image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-null,h-null//products/696e0bcb55259/69aa5b1956607productimage69a4f7b8adae6.png' }
+    ]
+  },
+  {
+    id: 'light-gear',
+    name: 'Light Gear',
+    products: [
+      { name: 'Black Flux Zip Hoodie', price: 1300, image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-null,h-null//products/696e0bcb55259/699c56c3913bcproductimage699c03358e600.jpg' },
+      { name: 'Black Flux Sweatpants', price: 900, image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-null,h-null//products/696e0bcb55259/699d9bbb7e5f1productimage699c03358e601.jpg' }
+    ]
+  },
+  {
+    id: 'manifesto',
+    name: 'Manifesto',
+    products: [
+      { name: 'The Sovereign Hoodie', price: 1500, image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-null,h-null//products/696e0bcb55259/69b54062cb422productimage6995933b34e69.png' },
+      { name: 'The Anthem Hoodie', price: 1500, image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-null,h-null//products/696e0bcb55259/69b19e7dbdea7productimage699c03358e5ed.jpg' }
     ]
   }
-  // Add Manifesto and Light Gear here following the same pattern
 ];
 
 export const CONTACT_LINKS = {
