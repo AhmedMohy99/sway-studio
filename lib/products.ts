@@ -7,10 +7,11 @@ export const COLLECTIONS = [
         name: 'ETERNITY PROTOCOL', 
         sku: 'ARO-OTOW-EP16',
         price: '730',
+        // Default image
         image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg',
         variants: [
-          { color: 'White Base', img: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg' },
-          { color: 'Navy Blue', img: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg' }
+          { colorName: 'White Base', url: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg' },
+          { colorName: 'Navy Blue', url: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg' }
         ]
       }
     ]
