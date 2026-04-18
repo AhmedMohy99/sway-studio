@@ -5,75 +5,71 @@ import TryOnEngine from '@/components/TryOnEngine'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState(COLLECTIONS[0].id)
-  const [selectedProduct, setSelectedProduct] = useState(COLLECTIONS[0].products[0])
   const [isTryOnOpen, setIsTryOnOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState(COLLECTIONS[0].products[0])
+
+  const currentCollection = COLLECTIONS.find(c => c.id === activeTab)
 
   return (
-    <main className="bg-black text-white min-h-screen font-sans">
-      {/* 1. STICKY NAV */}
-      <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-lg border-b border-white/5 p-6 flex justify-between items-center">
-        <h1 className="text-2xl font-black italic tracking-tighter text-cyan-400">SWAY</h1>
-        <div className="flex gap-4">
-          <a href={CONTACT_LINKS.instagram} target="_blank" className="text-[10px] uppercase tracking-widest text-zinc-500 hover:text-white">IG</a>
-          <a href={CONTACT_LINKS.whatsapp} target="_blank" className="text-[10px] uppercase tracking-widest text-zinc-500 hover:text-white">WA</a>
+    <main className="bg-black text-white min-h-screen">
+      {/* HEADER */}
+      <nav className="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-md border-b border-white/5 p-6 flex justify-between items-center">
+        <div className="flex flex-col">
+          <h1 className="text-xl font-black italic tracking-tighter text-cyan-400">SWAY STUDIO</h1>
+          <span className="text-[7px] tracking-[0.4em] uppercase text-zinc-500">2026 Virtual Drop</span>
+        </div>
+        <div className="flex gap-6">
+          <a href={CONTACT_LINKS.whatsapp} target="_blank" className="text-[9px] uppercase tracking-widest bg-white text-black px-4 py-2 rounded-full font-bold">WhatsApp Order</a>
         </div>
       </nav>
 
-      {/* 2. COLLECTION SELECTOR */}
-      <section className="pt-32 px-6">
-        <div className="flex gap-8 overflow-x-auto pb-4 no-scrollbar border-b border-white/5">
-          {COLLECTIONS.map(col => (
-            <button 
-              key={col.id}
-              onClick={() => setActiveTab(col.id)}
-              className={`text-xs uppercase tracking-[0.3em] whitespace-nowrap ${activeTab === col.id ? 'text-cyan-400 font-bold' : 'text-zinc-600'}`}
-            >
-              {col.name}
-            </button>
-          ))}
-        </div>
-      </section>
+      {/* COLLECTION TABS */}
+      <div className="pt-28 px-6 flex gap-6 overflow-x-auto no-scrollbar border-b border-white/5">
+        {COLLECTIONS.map(col => (
+          <button 
+            key={col.id}
+            onClick={() => setActiveTab(col.id)}
+            className={`pb-4 text-[10px] uppercase tracking-[0.3em] transition-all whitespace-nowrap ${activeTab === col.id ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-zinc-600'}`}
+          >
+            {col.name}
+          </button>
+        ))}
+      </div>
 
-      {/* 3. PRODUCT GRID */}
-      <section className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {COLLECTIONS.find(c => c.id === activeTab)?.products.map((prod, idx) => (
-          <div key={idx} className="group bg-zinc-950 border border-white/5 rounded-[32px] overflow-hidden hover:border-cyan-400/50 transition-all">
-            <div className="aspect-[4/5] relative overflow-hidden">
-              <img src={prod.image} alt={prod.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+      {/* PRODUCT GRID */}
+      <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {currentCollection?.products.map((prod, idx) => (
+          <div key={idx} className="bg-zinc-950 border border-white/5 rounded-[40px] p-2 hover:border-cyan-400/30 transition-all group">
+            <div className="aspect-[4/5] relative rounded-[35px] overflow-hidden bg-zinc-900">
+              <img src={prod.image} alt={prod.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <button 
                 onClick={() => { setSelectedProduct(prod); setIsTryOnOpen(true); }}
-                className="absolute bottom-4 left-4 right-4 bg-white text-black py-3 rounded-full text-[10px] font-bold uppercase tracking-widest translate-y-12 group-hover:translate-y-0 transition-transform"
+                className="absolute bottom-6 left-6 right-6 bg-cyan-400 text-black py-4 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-cyan-400/20"
               >
-                AI Try-On
+                Virtual Fitting
               </button>
             </div>
-            <div className="p-6">
-              <h3 className="text-sm font-medium uppercase tracking-tighter mb-1">{prod.name}</h3>
-              <div className="flex gap-3 items-center">
-                <span className="text-cyan-400 font-bold">EGP {prod.price}</span>
-                {prod.oldPrice && <span className="text-zinc-600 line-through text-xs">EGP {prod.oldPrice}</span>}
-              </div>
-              
-              {/* PREORDER BUTTON (WHATSAPP INTEGRATION) */}
+            <div className="p-6 text-center">
+              <h3 className="text-[11px] uppercase tracking-tighter text-zinc-300 mb-2 truncate">{prod.name}</h3>
+              <p className="font-bold text-lg italic">EGP {prod.price}</p>
               <a 
                 href={`${CONTACT_LINKS.whatsapp}&text=I want to preorder the ${prod.name}`}
-                className="mt-6 block w-full border border-white/10 text-center py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition"
+                className="mt-4 inline-block text-[9px] uppercase tracking-[0.2em] text-cyan-400 hover:text-white transition"
               >
-                Limited Drop Preorder
+                Preorder Limited Drop →
               </a>
             </div>
           </div>
         ))}
-      </section>
+      </div>
 
-      {/* 4. AI TRY-ON MODAL */}
+      {/* AI MODAL */}
       {isTryOnOpen && (
-        <div className="fixed inset-0 z-[100] bg-black p-6 flex flex-col">
-          <button onClick={() => setIsTryOnOpen(false)} className="self-end mb-4 text-zinc-500 uppercase text-[10px] tracking-widest">Close ✕</button>
-          <div className="flex-1 flex flex-col items-center justify-center">
-            <h2 className="text-xs uppercase tracking-[0.4em] text-cyan-400 mb-6">Fitting: {selectedProduct.name}</h2>
-            <TryOnEngine itemUrl={selectedProduct.image} />
-          </div>
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl p-6 flex flex-col items-center">
+          <button onClick={() => setIsTryOnOpen(false)} className="self-end text-zinc-500 hover:text-white mb-10 tracking-widest text-xs uppercase">✕ Close Engine</button>
+          <h2 className="text-cyan-400 text-[10px] uppercase tracking-[0.5em] mb-4">Calibrating: {selectedProduct.name}</h2>
+          <TryOnEngine itemUrl={selectedProduct.image} />
         </div>
       )}
     </main>
