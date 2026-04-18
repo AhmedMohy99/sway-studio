@@ -1,51 +1,39 @@
 'use client'
-import TryOnEngine from '@/components/TryOnEngine'
+import Sway3DEngine from '@/components/Sway3DEngine'
 import { useState } from 'react'
 
-const COLLECTION = [
-  { id: 1, name: 'Charcoal Rogue Hoodie', price: '1500', img: 'https://www.swaymaverick.com/charcoal.jpg' },
-  { id: 2, name: 'Ice Blue Rogue Hoodie', price: '1500', img: 'https://www.swaymaverick.com/blue.jpg' },
-  { id: 3, name: 'Dust Rose Rogue Hoodie', price: '1500', img: 'https://www.swaymaverick.com/pink.jpg' }
-];
-
 export default function Home() {
-  const [activeProduct, setActiveProduct] = useState(COLLECTION[0]);
+  const [stats, setStats] = useState({ height: 180, width: 36 });
+  const [activeItem, setActiveItem] = useState('https://www.swaymaverick.com/charcoal.jpg');
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      <header className="p-8 border-b border-white/5 flex justify-between items-center">
-        <h1 className="text-3xl font-black italic tracking-tighter">SWAY MAVERICK</h1>
-        <span className="text-[10px] bg-zinc-800 px-3 py-1 rounded-full uppercase">Urban Fossils Collection</span>
-      </header>
-
-      <div className="grid lg:grid-cols-2 min-h-[80vh]">
-        {/* Left: The Trial Area */}
-        <div className="p-8 flex items-center justify-center border-r border-white/5">
-           <TryOnEngine itemUrl={activeProduct.img} />
+    <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+      <div className="max-w-[1400px] mx-auto px-6 py-10">
+        
+        {/* TOP BAR */}
+        <div className="flex justify-between items-end mb-16">
+          <div>
+             <h1 className="text-7xl font-black italic tracking-tighter leading-none">SWAY</h1>
+             <p className="text-zinc-500 tracking-[0.5em] text-[10px] mt-2 uppercase">Urban Fossils / Fitting Room</p>
+          </div>
+          <div className="hidden md:block text-right">
+             <p className="text-[10px] text-zinc-600 uppercase tracking-widest">Model: Rogue Relic</p>
+             <p className="text-sm font-mono mt-1">V.02-2026</p>
+          </div>
         </div>
 
-        {/* Right: The Product Selection */}
-        <div className="p-12 flex flex-col justify-center">
-          <h2 className="text-6xl font-bold mb-6 tracking-tighter uppercase italic">{activeProduct.name}</h2>
-          <p className="text-2xl text-zinc-400 mb-10">EGP {activeProduct.price}.00</p>
-
-          <div className="grid grid-cols-3 gap-4 mb-12">
-            {COLLECTION.map((item) => (
-              <button 
-                key={item.id}
-                onClick={() => setActiveProduct(item)}
-                className={`aspect-square border-2 rounded-xl overflow-hidden transition-all ${activeProduct.id === item.id ? 'border-white' : 'border-transparent opacity-50'}`}
-              >
-                <img src={item.img} className="w-full h-full object-cover" />
-              </button>
-            ))}
+        <div className="grid lg:grid-cols-12 gap-12">
+          {/* THE TRIAL (The Hero) */}
+          <div className="lg:col-span-7">
+            <Sway3DEngine itemUrl={activeItem} userStats={stats} />
           </div>
 
-          <button className="w-full bg-white text-black py-6 rounded-full font-black uppercase tracking-widest text-sm hover:scale-[1.02] transition-transform">
-            Pre-Order Now
-          </button>
-        </div>
-      </div>
-    </main>
-  );
-}
+          {/* THE CONFIGURATION */}
+          <div className="lg:col-span-5 flex flex-col justify-center">
+            <div className="mb-12">
+              <h2 className="text-xs uppercase tracking-[0.4em] text-zinc-500 mb-6 border-b border-white/10 pb-4">Calibration</h2>
+              <div className="space-y-8">
+                <div>
+                  <label className="text-[10px] uppercase text-zinc-400 block mb-2">Chest Width (cm)</label>
+                  <input 
+                    type="
