@@ -7,11 +7,10 @@ export const COLLECTIONS = [
         name: 'ETERNITY PROTOCOL', 
         sku: 'ARO-OTOW-EP16',
         price: '730',
-        // Default image
-        image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg',
+        image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg',
         variants: [
-          { colorName: 'White Base', url: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg' },
-          { colorName: 'Navy Blue', url: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg' }
+          { colorName: 'White Base', url: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg' },
+          { colorName: 'Navy Blue', url: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg' }
         ]
       }
     ]
@@ -20,9 +19,8 @@ export const COLLECTIONS = [
     id: 'urban-fossils',
     name: 'URBAN FOSSILS',
     products: [
-      { name: 'CHARCOAL BLACK ROGUE RELIC HOODIE', price: '1,500', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69b19f852d887productimage699c03358e5fa.jpg' },
-      { name: 'ICE BLUE ROGUE RELIC HOODIE', price: '1,500', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c55ab75572productimage699c03358e5fc.jpg' },
-      { name: 'DUST ROSE ROGUE RELIC HOODIE', price: '1,500', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c5654e26ecproductimage699c03358e5fe.jpg' }
+      { name: 'CHARCOAL BLACK ROGUE RELIC', price: '1,500', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69b19f852d887productimage699c03358e5fa.jpg' },
+      { name: 'ICE BLUE ROGUE RELIC', price: '1,500', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c55ab75572productimage699c03358e5fc.jpg' }
     ]
   },
   {
