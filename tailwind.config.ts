@@ -9,8 +9,8 @@ const config: Config = {
     extend: {
       colors: {
         background: '#000000',
-        foreground: '#ffffff',
-        accent: '#333333',
+        swayCyan: '#00F5FF', // The glow color from your logo
+        swayDark: '#0A0A0A',
       },
     },
   },
