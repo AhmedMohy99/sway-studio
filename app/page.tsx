@@ -1,36 +1,54 @@
 'use client'
 import { useState } from 'react'
-import { COLLECTIONS, CONTACT_LINKS, MANIFESTO_TEXT } from '@/lib/products'
+import { COLLECTIONS, CONTACT_LINKS } from '@/lib/products'
 import TryOnEngine from '@/components/TryOnEngine'
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState(COLLECTIONS[0].id)
+  const [activeTab, setActiveTab] = useState('aero-collection')
+  const currentCollection = COLLECTIONS.find(c => c.id === activeTab) || COLLECTIONS[0]
+  const [selectedProduct, setSelectedProduct] = useState(currentCollection.products[0])
+  const [selectedSize, setSelectedSize] = useState('L')
   const [isTryOnOpen, setIsTryOnOpen] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState(COLLECTIONS[0].products[0])
 
-  const currentCollection = COLLECTIONS.find(c => c.id === activeTab)
+  const SIZES = ['S', 'M', 'L', 'XL', '2XL']
 
   return (
-    <main className="bg-black text-white min-h-screen selection:bg-cyan-400">
-      {/* 1. HEADER */}
-      <nav className="fixed top-0 w-full z-50 bg-black/95 backdrop-blur-xl border-b border-white/5 p-6 flex justify-between items-center">
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-[900] italic tracking-tighter text-cyan-400 leading-none">SWAY STUDIO</h1>
-          <span className="text-[7px] tracking-[0.6em] uppercase text-zinc-500 font-bold mt-1">AI-POWERED FITTING</span>
+    <main className="min-h-screen bg-black text-white font-sans selection:bg-cyan-400">
+      {/* 1. TOP ANNOUNCEMENT BAR */}
+      <div className="w-full bg-cyan-400 py-2 overflow-hidden whitespace-nowrap border-b border-black">
+        <div className="flex animate-marquee gap-10">
+          {[...Array(10)].map((_, i) => (
+            <span key={i} className="text-[9px] font-black uppercase text-black tracking-[0.3em]">
+              Crafted For The Maverick • Designed for those who CREATE THEIR OWN RULES • 
+            </span>
+          ))}
         </div>
-        <a href={CONTACT_LINKS.whatsapp} target="_blank" className="text-[10px] uppercase tracking-widest bg-white text-black px-6 py-2.5 rounded-full font-[900] hover:scale-105 transition">Order via WhatsApp</a>
+      </div>
+
+      {/* 2. HEADER */}
+      <nav className="p-8 flex justify-between items-center px-12 border-b border-white/5">
+        <div className="flex items-center gap-4">
+           <h1 className="text-2xl font-[1000] italic tracking-tighter text-cyan-400 leading-none">SWAY</h1>
+        </div>
+        <div className="hidden md:flex gap-10 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
+          <span className="hover:text-cyan-400 cursor-pointer transition">Home</span>
+          <span className="text-white cursor-pointer">Shop</span>
+          <span className="hover:text-cyan-400 cursor-pointer transition">Our Story</span>
+          <span className="hover:text-cyan-400 cursor-pointer transition">Size Guide</span>
+        </div>
       </nav>
 
-      {/* 2. PILL NAVIGATION */}
-      <div className="pt-28 px-6 flex gap-3 overflow-x-auto no-scrollbar border-b border-white/5 sticky top-0 bg-black z-40 pb-6">
+      {/* 3. CATEGORY SWITCHER */}
+      <div className="px-12 py-6 flex gap-4 overflow-x-auto no-scrollbar border-b border-white/5 bg-black/50 backdrop-blur-md sticky top-0 z-40">
         {COLLECTIONS.map(col => (
           <button 
             key={col.id}
-            onClick={() => setActiveTab(col.id)}
-            className={`px-6 py-3 rounded-full text-[11px] font-[900] uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap border-2 ${
-              activeTab === col.id 
-                ? 'bg-cyan-400 border-cyan-400 text-black shadow-[0_0_20px_rgba(0,245,255,0.3)]' 
-                : 'bg-transparent border-white/10 text-zinc-500 hover:border-white/30'
+            onClick={() => {
+              setActiveTab(col.id);
+              setSelectedProduct(col.products[0]);
+            }}
+            className={`px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border-2 ${
+              activeTab === col.id ? 'bg-cyan-400 border-cyan-400 text-black' : 'border-white/10 text-zinc-600'
             }`}
           >
             {col.name}
@@ -38,65 +56,84 @@ export default function Home() {
         ))}
       </div>
 
-      {/* 3. PRODUCT GRID */}
-      <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {currentCollection?.products.map((prod: any, idx: number) => (
-          <div key={idx} className="bg-zinc-950 border border-white/5 rounded-[40px] p-3 hover:border-cyan-400/40 transition-all group">
-            <div className="aspect-[4/5] relative rounded-[32px] overflow-hidden bg-zinc-900">
-              <img src={prod.image} alt={prod.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
+      {/* 4. THE PRODUCT VIEW (SPLIT SCREEN) */}
+      <div className="grid lg:grid-cols-2 min-h-[85vh]">
+        {/* LEFT: IMAGE VIEW */}
+        <div className="p-10 flex flex-col items-center justify-center border-r border-white/5 relative group">
+           <div className="w-full max-w-lg aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden relative border border-white/10">
+              <img 
+                src={selectedProduct.image} 
+                alt={selectedProduct.name} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
               <button 
-                onClick={() => { setSelectedProduct(prod); setIsTryOnOpen(true); }}
-                className="absolute bottom-6 left-6 right-6 bg-cyan-400 text-black py-4 rounded-full text-[11px] font-[900] uppercase tracking-widest shadow-2xl shadow-cyan-400/40 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all"
+                onClick={() => setIsTryOnOpen(true)}
+                className="absolute bottom-10 left-10 right-10 bg-black/80 backdrop-blur-md border border-cyan-400/30 text-cyan-400 py-5 rounded-full text-[10px] font-black uppercase tracking-[0.4em] opacity-0 group-hover:opacity-100 transition-all shadow-[0_0_30px_rgba(0,245,255,0.2)]"
               >
-                Virtual Fitting
+                Launch Virtual Fitting
               </button>
-            </div>
-            
-            <div className="p-6 text-center">
-              <h3 className="text-[12px] font-[900] uppercase tracking-tighter text-white mb-1 leading-tight">{prod.name}</h3>
-              <p className="text-[9px] text-zinc-600 font-bold mb-2 tracking-widest">{prod.sku || 'SKU: SWAY-GEN-26'}</p>
-              <p className="font-[900] text-xl italic text-cyan-400 tracking-tighter mb-4">EGP {prod.price}</p>
-              
-              {/* SIZE SELECTOR UI */}
-              <div className="flex justify-center gap-2 mb-6">
-                {['S', 'M', 'L', 'XL', '2XL'].map((size) => (
-                  <div key={size} className={`w-8 h-8 flex items-center justify-center border rounded-md text-[10px] font-black transition-all ${size === 'L' ? 'border-magenta-500 text-white border-2 shadow-[0_0_10px_rgba(255,0,255,0.3)]' : 'border-white/10 text-cyan-400'}`}>
-                    {size}
-                  </div>
-                ))}
-              </div>
+           </div>
+           <p className="mt-8 text-[9px] uppercase tracking-[0.5em] text-zinc-600">Hover to try on AI engine</p>
+        </div>
 
-              <a 
-                href={`${CONTACT_LINKS.whatsapp}&text=I want to preorder the ${prod.name} in Size L`}
-                className="mt-2 inline-block text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-white transition"
-              >
-                Preorder Drop →
-              </a>
+        {/* RIGHT: DETAILS VIEW */}
+        <div className="p-20 flex flex-col justify-center">
+          <div className="mb-12">
+            <h2 className="text-6xl font-[1000] italic tracking-tighter uppercase leading-none mb-4">{selectedProduct.name}</h2>
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-black tracking-widest text-zinc-600 uppercase">SKU: {selectedProduct.sku || 'SWAY-OTOW-26'}</span>
+              <span className="h-[1px] w-10 bg-zinc-800"></span>
+              <span className="text-cyan-400 text-[10px] font-black tracking-widest uppercase">In Stock</span>
             </div>
           </div>
-        ))}
+
+          <div className="mb-12">
+            <span className="text-4xl font-[1000] italic tracking-tighter">EGP {selectedProduct.price}.00</span>
+          </div>
+
+          {/* COLOR SELECTOR */}
+          <div className="mb-12">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-6">Variations:</p>
+            <div className="flex gap-4">
+              {currentCollection.products.map((p: any, i: number) => (
+                <button key={i} onClick={() => setSelectedProduct(p)} className={`w-20 h-24 rounded-2xl overflow-hidden border-2 transition-all ${selectedProduct.name === p.name ? 'border-cyan-400' : 'border-white/5 opacity-40 hover:opacity-100'}`}>
+                  <img src={p.image} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* SIZE SELECTOR */}
+          <div className="mb-12">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-6">Size Selection:</p>
+            <div className="flex gap-3">
+              {SIZES.map(s => (
+                <button 
+                  key={s} 
+                  onClick={() => setSelectedSize(s)}
+                  className={`w-14 h-14 flex items-center justify-center rounded-xl border-2 font-black transition-all ${selectedSize === s ? 'border-[#FF00FF] text-[#FF00FF] shadow-[0_0_20px_rgba(255,0,255,0.2)]' : 'border-white/10 text-zinc-600'}`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <a 
+            href={`${CONTACT_LINKS.whatsapp}&text=ORDER: ${selectedProduct.name} | SIZE: ${selectedSize}`}
+            className="w-full bg-white text-black py-6 rounded-full text-xs font-[1000] uppercase tracking-[0.4em] text-center hover:bg-cyan-400 transition-colors shadow-2xl shadow-cyan-400/10"
+          >
+            Confirm Limited Preorder
+          </a>
+        </div>
       </div>
 
-      {/* 4. MANIFESTO FOOTER */}
-      <footer className="p-20 border-t border-white/5 text-center">
-        <p className="text-[10px] uppercase tracking-[0.8em] text-zinc-500 mb-8">The Manifesto</p>
-        <h2 className="text-3xl font-[900] italic tracking-tighter max-w-2xl mx-auto leading-tight mb-10">
-          "{MANIFESTO_TEXT}"
-        </h2>
-        <div className="flex justify-center gap-10">
-            <a href={CONTACT_LINKS.instagram} target="_blank" className="text-[10px] uppercase tracking-[0.3em] font-bold text-zinc-400 hover:text-white">Instagram</a>
-            <a href={CONTACT_LINKS.facebook} target="_blank" className="text-[10px] uppercase tracking-[0.3em] font-bold text-zinc-400 hover:text-white">Facebook</a>
-        </div>
-      </footer>
-
-      {/* 5. AI MODAL */}
+      {/* AI MODAL */}
       {isTryOnOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/98 backdrop-blur-3xl p-6 flex flex-col items-center overflow-y-auto">
-          <button onClick={() => setIsTryOnOpen(false)} className="self-end text-zinc-500 hover:text-white mb-10 tracking-widest text-xs font-black uppercase border border-white/10 px-4 py-2 rounded-full">✕ Close Studio</button>
+        <div className="fixed inset-0 z-[100] bg-black/98 backdrop-blur-3xl flex flex-col items-center justify-center p-6">
+          <button onClick={() => setIsTryOnOpen(false)} className="absolute top-10 right-10 text-zinc-500 hover:text-white uppercase text-[10px] font-black tracking-widest border border-white/10 px-6 py-2 rounded-full">✕ Exit Studio</button>
           <div className="w-full max-w-lg">
-            <h2 className="text-cyan-400 text-[11px] font-black uppercase tracking-[0.5em] mb-6 text-center italic">Calibrating: {selectedProduct.name}</h2>
-            <TryOnEngine itemUrl={selectedProduct.image} />
+             <TryOnEngine itemUrl={selectedProduct.image} />
           </div>
         </div>
       )}
