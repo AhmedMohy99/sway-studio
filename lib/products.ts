@@ -3,9 +3,9 @@ export const COLLECTIONS = [
     id: 'urban-fossils',
     name: 'URBAN FOSSILS',
     products: [
-      { name: 'CHARCOAL BLACK ROGUE RELIC HOODIE', price: '1,500', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69b19f852d887productimage699c03358e5fa.jpg' },
-      { name: 'ICE BLUE ROGUE RELIC HOODIE', price: '1,500', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c55ab75572productimage699c03358e5fc.jpg' },
-      { name: 'DUST ROSE ROGUE RELIC HOODIE', price: '1,500', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c5654e26ecproductimage699c03358e5fe.jpg' }
+      { name: 'CHARCOAL BLACK ROGUE RELIC HOODIE', price: '1,500', oldPrice: '1,900', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69b19f852d887productimage699c03358e5fa.jpg' },
+      { name: 'ICE BLUE ROGUE RELIC HOODIE', price: '1,500', oldPrice: '1,900', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c55ab75572productimage699c03358e5fc.jpg' },
+      { name: 'DUST ROSE ROGUE RELIC HOODIE', price: '1,500', oldPrice: '1,900', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c5654e26ecproductimage699c03358e5fe.jpg' }
     ]
   },
   {
@@ -37,6 +37,24 @@ export const COLLECTIONS = [
       { name: 'THE DECREE HOODIE', price: '1,500 - 1,900', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/69b0cd8ca5e1cproductimage699c03358e5f2.jpg' },
       { name: 'HIGH TIDE HOODIE', price: '1,400 - 1,800', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c4ff03868cproductimage699c03358e5f5.jpg' },
       { name: 'BLUE AUTHORITY HOODIE', price: '1,400 - 1,800', image: 'https://ik.imagekit.io/8tgwppr1x/tr:w-1000,h-1000/products/696e0bcb55259/699c508680247productimage699c03358e5f7.jpg' }
+    ]
+  },
+  {
+    id: 'aero-collection',
+    name: 'AERO COLLECTION',
+    products: [
+      { 
+        name: 'ETERNITY PROTOCOL', 
+        sku: 'ARO-OTOW-EP16',
+        price: '730', 
+        image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg' 
+      },
+      { 
+        name: 'AERO TECH PIECE', 
+        sku: 'ARO-OTOW-TECH',
+        price: '730', 
+        image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1000/products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg' 
+      }
     ]
   }
 ];
