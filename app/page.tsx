@@ -2,62 +2,50 @@
 import TryOnEngine from '@/components/TryOnEngine'
 import { useState } from 'react'
 
+const COLLECTION = [
+  { id: 1, name: 'Charcoal Rogue Hoodie', price: '1500', img: 'https://www.swaymaverick.com/charcoal.jpg' },
+  { id: 2, name: 'Ice Blue Rogue Hoodie', price: '1500', img: 'https://www.swaymaverick.com/blue.jpg' },
+  { id: 3, name: 'Dust Rose Rogue Hoodie', price: '1500', img: 'https://www.swaymaverick.com/pink.jpg' }
+];
+
 export default function Home() {
-  const [selectedItem, setSelectedItem] = useState('https://www.swaymaverick.com/path-to-hoodie.jpg')
+  const [activeProduct, setActiveProduct] = useState(COLLECTION[0]);
 
   return (
-    <main className="min-h-screen bg-black text-white font-sans">
-      {/* 1. Header Navigation */}
-      <nav className="p-6 flex justify-between items-center border-b border-white/10">
-        <h1 className="text-2xl font-black tracking-tighter">SWAY MAVERICK</h1>
-        <div className="flex gap-6 text-[10px] uppercase tracking-widest text-zinc-400">
-          <span>Shop</span>
-          <span>Collection</span>
-          <span className="text-white">Fitting Room</span>
-        </div>
-      </nav>
+    <main className="min-h-screen bg-black text-white">
+      <header className="p-8 border-b border-white/5 flex justify-between items-center">
+        <h1 className="text-3xl font-black italic tracking-tighter">SWAY MAVERICK</h1>
+        <span className="text-[10px] bg-zinc-800 px-3 py-1 rounded-full uppercase">Urban Fossils Collection</span>
+      </header>
 
-      <div className="container mx-auto px-4 py-10 grid lg:grid-cols-2 gap-12 items-center">
-        
-        {/* 2. Left Side: The AI Fitting Room */}
-        <div className="relative">
-          <div className="absolute -top-4 -left-4 bg-white text-black px-4 py-1 text-[10px] font-bold uppercase z-10">
-            Live AI Preview
-          </div>
-          <TryOnEngine itemUrl={selectedItem} />
+      <div className="grid lg:grid-cols-2 min-h-[80vh]">
+        {/* Left: The Trial Area */}
+        <div className="p-8 flex items-center justify-center border-r border-white/5">
+           <TryOnEngine itemUrl={activeProduct.img} />
         </div>
 
-        {/* 3. Right Side: Product Details */}
-        <div className="flex flex-col gap-6">
-          <div>
-            <p className="text-zinc-500 uppercase tracking-[0.3em] text-xs mb-2">Urban Fossils Collection</p>
-            <h2 className="text-5xl font-bold italic tracking-tighter mb-4">ROGUE RELIC HOODIE</h2>
-            <p className="text-3xl font-light text-zinc-300">EGP 1,500.00</p>
+        {/* Right: The Product Selection */}
+        <div className="p-12 flex flex-col justify-center">
+          <h2 className="text-6xl font-bold mb-6 tracking-tighter uppercase italic">{activeProduct.name}</h2>
+          <p className="text-2xl text-zinc-400 mb-10">EGP {activeProduct.price}.00</p>
+
+          <div className="grid grid-cols-3 gap-4 mb-12">
+            {COLLECTION.map((item) => (
+              <button 
+                key={item.id}
+                onClick={() => setActiveProduct(item)}
+                className={`aspect-square border-2 rounded-xl overflow-hidden transition-all ${activeProduct.id === item.id ? 'border-white' : 'border-transparent opacity-50'}`}
+              >
+                <img src={item.img} className="w-full h-full object-cover" />
+              </button>
+            ))}
           </div>
 
-          <div className="bg-zinc-900/50 p-6 rounded-2xl border border-white/5">
-            <h3 className="text-xs uppercase tracking-widest text-zinc-500 mb-4">Select Style</h3>
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setSelectedItem('YOUR_BLACK_HOODIE_URL')}
-                className="w-12 h-12 rounded-full bg-zinc-800 border-2 border-white"
-              ></button>
-              <button 
-                onClick={() => setSelectedItem('YOUR_BLUE_HOODIE_URL')}
-                className="w-12 h-12 rounded-full bg-blue-900 border border-white/10"
-              ></button>
-            </div>
-          </div>
-
-          <button className="w-full bg-white text-black font-black py-5 rounded-full uppercase tracking-widest hover:bg-zinc-200 transition-all">
-            Add to Cart — Reserve Fit
+          <button className="w-full bg-white text-black py-6 rounded-full font-black uppercase tracking-widest text-sm hover:scale-[1.02] transition-transform">
+            Pre-Order Now
           </button>
-          
-          <p className="text-[10px] text-zinc-500 text-center uppercase tracking-widest">
-            Free Shipping in Cairo • Secure Checkout
-          </p>
         </div>
       </div>
     </main>
-  )
+  );
 }
