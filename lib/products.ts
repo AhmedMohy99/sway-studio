@@ -39,9 +39,7 @@ export const COLLECTIONS = [
     name: 'LIGHT GEAR',
     products: [
       { name: 'Black Flux Zip Hoodie', price: '1300', oldPrice: '1700', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699c56c3913bcproductimage699c03358e600.jpg' },
-      { name: 'Black Flux Sweatpants', price: '900', oldPrice: '1400', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699d9bbbb2f5aproductimage699c03358e601.jpg' },
-      { name: 'Maverick Code Zip Hoodie', price: '1400', oldPrice: '1800', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699c57e9557ffproductimage699c03358e603.jpg' },
-      { name: 'Light Code Sweatpants', price: '900', oldPrice: '1300', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699d9be7c3129productimage699c03358e605.jpg' }
+      { name: 'Black Flux Sweatpants', price: '900', oldPrice: '1400', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699d9bbbb2f5aproductimage699c03358e601.jpg' }
     ]
   },
   {
@@ -49,10 +47,7 @@ export const COLLECTIONS = [
     name: 'MANIFESTO',
     products: [
       { name: 'The Sovereign Hoodie', price: '1500', oldPrice: '1900', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69b54062cb422productimage6995933b34e69.png' },
-      { name: 'The Anthem Hoodie', price: '1500', oldPrice: '1900', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69b19e7dbdea7productimage699c03358e5ed.jpg' },
-      { name: 'The Decree Hoodie', price: '1500', oldPrice: '1900', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69b0cd8ca5e1cproductimage699c03358e5f2.jpg' },
-      { name: 'High Tide Hoodie', price: '1400', oldPrice: '1800', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69b0cb334f851productimage699c03358e5f5.jpg' },
-      { name: 'Blue Authority Hoodie', price: '1400', oldPrice: '1800', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699c508680247productimage699c03358e5f7.jpg' }
+      { name: 'The Anthem Hoodie', price: '1500', oldPrice: '1900', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69b19e7dbdea7productimage699c03358e5ed.jpg' }
     ]
   }
 ];
