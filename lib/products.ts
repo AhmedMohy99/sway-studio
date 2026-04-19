@@ -28,9 +28,9 @@ export const COLLECTIONS = [
     id: 'colours-explosion',
     name: 'COLOURS EXPLOSION',
     products: [
-      { name: 'Maverick Phoenix Set - WHITE', price: '2400', oldPrice: '2800', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69aa674aae5f0productimage69a4f7b8adae6.jpg' },
+      { name: 'Maverick Phoenix Set - WHITE EDITION', price: '2400', oldPrice: '2800', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69aa674aae5f0productimage69a4f7b8adae6.jpg' },
       { name: 'Maverick Phoenix Hoodie', price: '1400', oldPrice: '1800', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69ac482151071productimage69a5d9cc657ab.jpg' },
-      { name: 'Maverick Phoenix Set - BLACK', price: '2400', oldPrice: '2800', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69a4eb6cc4c0dproductimage69a4eb2b29665.jpg' },
+      { name: 'Maverick Phoenix Set', price: '2400', oldPrice: '2800', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69a4eb6cc4c0dproductimage69a4eb2b29665.jpg' },
       { name: 'Spectrum Explosion Hoodie', price: '1400', oldPrice: '1800', image: 'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69aa6a7926906productimage699c03358e5f8.jpg' }
     ]
   },
