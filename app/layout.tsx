@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'SWAY STUDIO',
-  description: 'AI-Powered Streetwear fitting',
+  description: 'AI-Powered Streetwear Fitting',
 }
 
 export default function RootLayout({
