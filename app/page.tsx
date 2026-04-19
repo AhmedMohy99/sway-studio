@@ -85,9 +85,12 @@ export default function Home() {
       {isTryOnOpen && (
         <div className="fixed inset-0 z-[100] bg-black/98 backdrop-blur-3xl flex flex-col items-center justify-center p-6 overflow-y-auto">
           <button onClick={() => setIsTryOnOpen(false)} className="absolute top-10 right-10 text-zinc-500 hover:text-white uppercase text-[10px] font-black tracking-widest border border-white/10 px-6 py-2 rounded-full transition">✕ Close Studio</button>
-          <div className="w-full max-w-lg mt-20 text-center">
-            <h2 className="text-white text-4xl font-[1000] italic uppercase mb-2 leading-none">{selectedProduct.name}</h2>
-            <p className="text-cyan-400 font-black mb-8 italic text-lg">EGP {selectedProduct.price}.00</p>
+          
+          <div className="w-full max-w-lg mt-20 text-left">
+            <h2 className="text-white text-4xl font-[1000] italic uppercase mb-2 leading-none text-center">{selectedProduct.name}</h2>
+            <p className="text-cyan-400 font-black mb-8 italic text-lg text-center">EGP {selectedProduct.price}.00</p>
+            
+            {/* VARIANT/COLOR SWITCHER */}
             {selectedProduct.variants && (
               <div className="flex justify-center gap-3 mb-8">
                 {selectedProduct.variants.map((v: any) => (
@@ -101,8 +104,30 @@ export default function Home() {
                 ))}
               </div>
             )}
-            <TryOnEngine itemUrl={activeImage} />
-            <a href={`${CONTACT_LINKS.whatsapp}&text=PREORDER: ${selectedProduct.name} | SIZE: ${selectedSize}`} className="mt-10 block w-full bg-white text-black py-6 rounded-full text-center text-xs font-[1000] uppercase tracking-[0.4em] shadow-2xl">Confirm Preorder</a>
+
+            {/* SIZE SWITCHER MOVED ABOVE ENGINE */}
+            <div className="mb-6 bg-zinc-950 p-6 rounded-[30px] border border-white/5">
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.3em]">1. Select Target Size</p>
+                <button onClick={() => setIsSizeGuideOpen(true)} className="text-[9px] font-black text-cyan-400 hover:text-white transition uppercase tracking-widest">View Guide</button>
+              </div>
+              <div className="flex justify-center gap-3">
+                {['S', 'M', 'L', 'XL', '2XL'].map(s => (
+                  <button 
+                    key={s} 
+                    onClick={() => setSelectedSize(s)} 
+                    className={`w-12 h-12 border-2 rounded-xl font-[1000] text-sm transition-all ${selectedSize === s ? 'border-magenta-500 text-magenta-500 shadow-[0_0_15px_rgba(255,0,255,0.2)] bg-magenta-500/10' : 'border-white/10 text-zinc-600 hover:border-white/30'}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* ENGINE WITH PROPS */}
+            <TryOnEngine itemUrl={activeImage} selectedSize={selectedSize} />
+            
+            <a href={`${CONTACT_LINKS.whatsapp}&text=PREORDER: ${selectedProduct.name} | SIZE: ${selectedSize}`} className="mt-6 block w-full bg-white text-black py-6 rounded-full text-center text-xs font-[1000] uppercase tracking-[0.4em] shadow-2xl hover:scale-[0.98] transition-transform">Confirm Preorder</a>
           </div>
         </div>
       )}
