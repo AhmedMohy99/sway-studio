@@ -105,7 +105,7 @@ export default function Home() {
               </div>
             )}
 
-            {/* SIZE SWITCHER MOVED ABOVE ENGINE */}
+            {/* SIZE SWITCHER */}
             <div className="mb-6 bg-zinc-950 p-6 rounded-[30px] border border-white/5">
               <div className="flex justify-between items-center mb-4">
                 <p className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.3em]">1. Select Target Size</p>
@@ -124,9 +124,14 @@ export default function Home() {
               </div>
             </div>
 
-            {/* ENGINE WITH PROPS */}
-            <TryOnEngine itemUrl={activeImage} selectedSize={selectedSize} />
+            {/* ENGINE WITH PROPS (This is what connects to WhatsApp!) */}
+            <TryOnEngine 
+              itemUrl={activeImage} 
+              selectedSize={selectedSize} 
+              productName={selectedProduct.name} 
+            />
             
+            {/* DIRECT CHECKOUT (If they skip the AI) */}
             <a href={`${CONTACT_LINKS.whatsapp}&text=PREORDER: ${selectedProduct.name} | SIZE: ${selectedSize}`} className="mt-6 block w-full bg-white text-black py-6 rounded-full text-center text-xs font-[1000] uppercase tracking-[0.4em] shadow-2xl hover:scale-[0.98] transition-transform">Confirm Preorder</a>
           </div>
         </div>
