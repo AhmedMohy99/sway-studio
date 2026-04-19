@@ -1,8 +1,9 @@
+import type { Metadata } from 'next'
 import './globals.css'
-import React from 'react'
 
-export const metadata = {
-  title: 'Sway Studio',
+export const metadata: Metadata = {
+  title: 'SWAY STUDIO',
+  description: 'AI-Powered Streetwear fitting',
 }
 
 export default function RootLayout({
@@ -12,9 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        {children}
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   )
 }
