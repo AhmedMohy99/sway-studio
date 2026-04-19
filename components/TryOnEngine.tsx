@@ -4,12 +4,12 @@ import { useState, useRef, useEffect } from 'react'
 interface TryOnProps {
   itemUrl: string;
   selectedSize?: string;
+  productName?: string;
 }
 
-export default function TryOnEngine({ itemUrl, selectedSize = "L" }: TryOnProps) {
-  const [step, setStep] = useState<'capture' | 'metrics' | 'processing' | 'result'>('capture')
+export default function TryOnEngine({ itemUrl, selectedSize = "L", productName = "Sway Studio Item" }: TryOnProps) {
+  const [step, setStep] = useState<'capture' | 'metrics' | 'uploading' | 'success'>('capture')
   const [userImage, setUserImage] = useState<string | null>(null)
-  const [finalAiImage, setFinalAiImage] = useState<string | null>(null)
   const [height, setHeight] = useState('')
   const [weight, setWeight] = useState('')
   
@@ -38,7 +38,6 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L" }: TryOnProps)
     }
   }
 
-  // FIX 1: Format Camera Photo as compressed Base64 Data
   const takePhoto = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current
@@ -48,7 +47,6 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L" }: TryOnProps)
       const context = canvas.getContext('2d')
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height)
-        // Use 0.8 quality to prevent the file from being too large for the server
         const base64Data = canvas.toDataURL('image/jpeg', 0.8) 
         setUserImage(base64Data)
         stopCamera()
@@ -57,13 +55,11 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L" }: TryOnProps)
     }
   }
 
-  // FIX 2: Format Uploaded Photo as Base64 Data instead of local Blob
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       const reader = new FileReader()
       reader.onloadend = () => {
-        // This converts the image to a raw data string the AI can read
         setUserImage(reader.result as string)
         setStep('metrics')
       }
@@ -73,51 +69,64 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L" }: TryOnProps)
 
   const handleGenerate = async () => {
     if (!height || !weight || !userImage) return alert("Missing data.")
-    setStep('processing')
+    setStep('uploading') 
     
     try {
-      const response = await fetch('/api/tryon', {
+      // 1. Upload the photo to Vercel Blob
+      const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userImage: userImage, // Now properly formatted as Base64
-          garmentImage: itemUrl
-        })
+        body: JSON.stringify({ base64Image: userImage })
       })
+      
+      const uploadData = await uploadResponse.json()
+      
+      if (!uploadData.url) throw new Error("Cloud upload failed")
 
-      const data = await response.json()
+      // 2. Format the WhatsApp Message
+      const message = `*NEW VIRTUAL FITTING REQUEST*%0A%0A` +
+                      `*Item:* ${productName}%0A` +
+                      `*Size Requested:* ${selectedSize}%0A` +
+                      `*Customer Height:* ${height} cm%0A` +
+                      `*Customer Weight:* ${weight} kg%0A%0A` +
+                      `*Customer Photo:* ${uploadData.url}%0A%0A` +
+                      `Please generate my fitting!`;
 
-      if (data.resultUrl) {
-        setFinalAiImage(data.resultUrl)
-        setStep('result')
-      } else {
-        alert("AI Engine failed to map the garment. Please try a clearer photo.")
-        setStep('capture')
-      }
+      // 3. Open WhatsApp (Using your Sway Maverick number)
+      const whatsappNumber = "201033866838"; 
+      window.open(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`, '_blank');
+
+      // 4. Show Success Screen
+      setStep('success')
+
     } catch (error) {
-      alert("Network Error with AI Engine.")
+      console.error(error)
+      alert("Network Error saving image. Please try again.")
       setStep('capture')
     }
   }
 
   return (
-    <div className="w-full bg-zinc-950/80 backdrop-blur-xl border border-white/10 rounded-[30px] p-6 mt-6 overflow-hidden relative">
+    <div className="w-full mt-6">
       
       {/* CAPTURE STEP */}
       {step === 'capture' && (
-        <div className="flex flex-col items-center">
-          <p className="text-[10px] font-black uppercase text-cyan-400 tracking-[0.3em] mb-4">1. Subject Capture</p>
-          <div className="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden border-2 border-dashed border-white/20 mb-6 flex items-center justify-center">
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6 flex flex-col items-center">
+          <p className="text-[10px] font-black uppercase text-cyan-400 tracking-[0.3em] mb-4">2. Subject Capture</p>
+          <div className="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden border border-dashed border-zinc-700 flex items-center justify-center">
+            
             {isCameraActive ? (
               <>
                 <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover transform -scale-x-100" />
                 <button onClick={takePhoto} className="absolute bottom-6 w-16 h-16 bg-white rounded-full border-4 border-cyan-400 shadow-[0_0_20px_rgba(0,245,255,0.5)] transition-transform hover:scale-95 active:scale-90" />
               </>
             ) : (
-              <div className="text-center p-6">
-                <button onClick={startCamera} className="bg-cyan-400 text-black px-8 py-4 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white mb-4 w-full">Open Camera</button>
-                <p className="text-zinc-600 text-[10px] uppercase font-bold mb-4">OR</p>
-                <label className="border border-white/20 text-white px-8 py-4 rounded-full text-[10px] font-black uppercase tracking-widest cursor-pointer w-full block">
+              <div className="flex flex-col items-center p-6 w-full max-w-[200px]">
+                <button onClick={startCamera} className="bg-cyan-400 text-black w-full py-4 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-cyan-300 transition-colors mb-4 shadow-[0_0_15px_rgba(0,245,255,0.2)]">
+                  Open Camera
+                </button>
+                <p className="text-zinc-600 text-[9px] uppercase font-bold tracking-widest mb-4">OR</p>
+                <label className="border border-zinc-700 hover:border-cyan-400 text-white w-full py-4 rounded-full text-[10px] font-black uppercase tracking-widest cursor-pointer text-center transition-colors">
                   Upload Photo
                   <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
                 </label>
@@ -130,9 +139,9 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L" }: TryOnProps)
 
       {/* METRICS STEP */}
       {step === 'metrics' && (
-        <div className="animate-fade-in">
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6 animate-fade-in">
           <div className="flex justify-between items-center mb-6">
-            <p className="text-[10px] font-black uppercase text-cyan-400 tracking-[0.3em]">2. Body Calibration</p>
+            <p className="text-[10px] font-black uppercase text-cyan-400 tracking-[0.3em]">3. Body Calibration</p>
             <button onClick={() => { setStep('capture'); setUserImage(null); }} className="text-[9px] uppercase tracking-widest text-zinc-500 hover:text-white font-bold">Retake</button>
           </div>
           <div className="flex gap-4 mb-8">
@@ -142,32 +151,32 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L" }: TryOnProps)
             <div><input type="number" placeholder="Height (cm)" value={height} onChange={(e) => setHeight(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-white text-sm focus:border-cyan-400 outline-none" /></div>
             <div><input type="number" placeholder="Weight (kg)" value={weight} onChange={(e) => setWeight(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-white text-sm focus:border-cyan-400 outline-none" /></div>
           </div>
-          <button onClick={handleGenerate} className="w-full bg-cyan-400 text-black py-5 rounded-full text-xs font-[1000] uppercase tracking-widest shadow-[0_0_20px_rgba(0,245,255,0.3)]">
-            Initialize AI Engine
+          <button onClick={handleGenerate} className="w-full bg-cyan-400 text-black py-5 rounded-full text-xs font-[1000] uppercase tracking-widest shadow-[0_0_20px_rgba(0,245,255,0.3)] hover:scale-[0.98] transition-transform">
+            Send Fitting Request
           </button>
         </div>
       )}
 
-      {/* PROCESSING STEP */}
-      {step === 'processing' && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <div className="relative w-32 h-32 mb-8 animate-pulse">
+      {/* UPLOADING STEP */}
+      {step === 'uploading' && (
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-12 flex flex-col items-center justify-center">
+          <div className="relative w-16 h-16 mb-6">
             <div className="absolute inset-0 border-t-4 border-cyan-400 rounded-full animate-spin"></div>
           </div>
-          <h3 className="text-xl font-[1000] italic text-cyan-400 uppercase tracking-tighter animate-pulse">Running Neural Net...</h3>
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-2">Connecting to AI Server...</p>
+          <h3 className="text-lg font-[1000] italic text-cyan-400 uppercase tracking-tighter animate-pulse">Securing Link...</h3>
         </div>
       )}
 
-      {/* RESULT STEP */}
-      {step === 'result' && (
-        <div className="animate-fade-in text-center">
-          <h3 className="text-2xl font-[1000] italic text-cyan-400 mb-2 uppercase">Fitting Complete</h3>
-          <div className="relative w-full aspect-[3/4] bg-zinc-900 rounded-[30px] overflow-hidden border border-cyan-400/50 shadow-[0_0_30px_rgba(0,245,255,0.2)]">
-            {finalAiImage && <img src={finalAiImage} className="w-full h-full object-cover" alt="AI Fitted Result" />}
-          </div>
-          <button onClick={() => setStep('capture')} className="mt-8 text-[10px] font-black tracking-widest text-zinc-500 uppercase hover:text-white border border-white/10 px-6 py-3 rounded-full">
-            Try Another Fit
+      {/* SUCCESS STEP */}
+      {step === 'success' && (
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-8 text-center animate-fade-in">
+          <div className="w-16 h-16 bg-cyan-400/20 text-cyan-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 border border-cyan-400">✓</div>
+          <h3 className="text-xl font-[1000] italic text-white mb-2 uppercase">Request Sent!</h3>
+          <p className="text-[10px] text-zinc-400 tracking-widest mb-6 uppercase font-bold leading-relaxed">
+            Please check your WhatsApp.<br/>Our team is generating your AI fitting right now.
+          </p>
+          <button onClick={() => setStep('capture')} className="text-[10px] font-black tracking-widest text-zinc-500 uppercase hover:text-white border border-white/10 px-6 py-3 rounded-full transition-colors">
+            Start Over
           </button>
         </div>
       )}
