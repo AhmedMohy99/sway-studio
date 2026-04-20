@@ -1,184 +1,304 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+
+import { useEffect, useRef, useState } from 'react'
+import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision'
 
 interface TryOnProps {
-  itemUrl: string;
-  selectedSize?: string;
-  productName?: string;
+  itemUrl: string
+  selectedSize?: string
+  productName?: string
 }
 
-export default function TryOnEngine({ itemUrl, selectedSize = "L", productName = "Sway Maverick Item" }: TryOnProps) {
-  const [step, setStep] = useState<'capture' | 'metrics' | 'uploading' | 'success'>('capture')
-  const [userImage, setUserImage] = useState<string | null>(null)
-  const [height, setHeight] = useState('')
-  const [weight, setWeight] = useState('')
+const SIZE_SCALE: Record<string, number> = {
+  S: 0.9,
+  M: 1,
+  L: 1.08,
+  XL: 1.16,
+  '2XL': 1.24,
+}
+
+export default function TryOnEngine({
+  itemUrl,
+  selectedSize = 'L',
+  productName = 'Sway Maverick Item',
+}: TryOnProps) {
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const poseLandmarkerRef = useRef<PoseLandmarker | null>(null)
+  const garmentImageRef = useRef<HTMLImageElement | null>(null)
+  const animationFrameRef = useRef<number | null>(null)
+  const lastVideoTimeRef = useRef(-1)
+
+  const [isLoading, setIsLoading] = useState(true)
   const [cameraError, setCameraError] = useState<string | null>(null)
-  
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [isCameraActive, setIsCameraActive] = useState(false)
+  const [isCameraReady, setIsCameraReady] = useState(false)
 
-  useEffect(() => { return () => stopCamera() }, [])
+  useEffect(() => {
+    let mounted = true
+    let mediaStream: MediaStream | null = null
 
-  const startCamera = async () => {
-    setCameraError(null)
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: 'user',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        } 
-      })
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        setIsCameraActive(true)
+    const loadEngine = async () => {
+      try {
+        setIsLoading(true)
+        setCameraError(null)
+
+        const vision = await FilesetResolver.forVisionTasks(
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+        )
+
+        const poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath:
+              'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task',
+          },
+          runningMode: 'VIDEO',
+          numPoses: 1,
+        })
+
+        poseLandmarkerRef.current = poseLandmarker
+
+        const garmentImage = new Image()
+        garmentImage.crossOrigin = 'anonymous'
+        garmentImage.src = itemUrl
+
+        await new Promise<void>((resolve, reject) => {
+          garmentImage.onload = () => resolve()
+          garmentImage.onerror = () =>
+            reject(
+              new Error(
+                'Garment image failed to load. Use a valid transparent PNG path.'
+              )
+            )
+        })
+
+        garmentImageRef.current = garmentImage
+
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'user',
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        })
+
+        if (!videoRef.current) return
+
+        videoRef.current.srcObject = mediaStream
+        await videoRef.current.play()
+
+        if (!mounted) return
+
+        setIsCameraReady(true)
+        setIsLoading(false)
+        renderFrame()
+      } catch (error: any) {
+        console.error(error)
+        setCameraError(
+          error?.message ||
+            'Could not start the live fitting engine. Please allow camera access.'
+        )
+        setIsLoading(false)
       }
-    } catch (err: any) {
-      console.error(err)
-      setCameraError("Camera access denied. Please allow camera permissions or use 'Upload Photo'.")
     }
-  }
 
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream
-      stream.getTracks().forEach(track => track.stop())
-      videoRef.current.srcObject = null
-      setIsCameraActive(false)
-    }
-  }
-
-  const takePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
+    const renderFrame = async () => {
       const video = videoRef.current
       const canvas = canvasRef.current
-      const scale = 800 / video.videoWidth;
-      canvas.width = 800;
-      canvas.height = video.videoHeight * scale;
-      const context = canvas.getContext('2d')
-      if (context) {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height)
-        setUserImage(canvas.toDataURL('image/jpeg', 0.6))
-        stopCamera()
-        setStep('metrics')
-      }
-    }
-  }
+      const poseLandmarker = poseLandmarkerRef.current
+      const garmentImage = garmentImageRef.current
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const img = new Image();
-        img.src = reader.result as string;
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = 800; canvas.height = (img.height / img.width) * 800;
-            canvas.getContext('2d')?.drawImage(img, 0, 0, canvas.width, canvas.height);
-            setUserImage(canvas.toDataURL('image/jpeg', 0.6));
-            setStep('metrics');
+      if (!video || !canvas || !poseLandmarker || !garmentImage) {
+        animationFrameRef.current = requestAnimationFrame(renderFrame)
+        return
+      }
+
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        animationFrameRef.current = requestAnimationFrame(renderFrame)
+        return
+      }
+
+      const width = video.videoWidth
+      const height = video.videoHeight
+
+      if (!width || !height) {
+        animationFrameRef.current = requestAnimationFrame(renderFrame)
+        return
+      }
+
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width
+        canvas.height = height
+      }
+
+      ctx.clearRect(0, 0, width, height)
+
+      // mirror preview like selfie camera
+      ctx.save()
+      ctx.translate(width, 0)
+      ctx.scale(-1, 1)
+      ctx.drawImage(video, 0, 0, width, height)
+
+      if (video.currentTime !== lastVideoTimeRef.current) {
+        lastVideoTimeRef.current = video.currentTime
+
+        const results = poseLandmarker.detectForVideo(video, performance.now())
+
+        if (results.landmarks && results.landmarks.length > 0) {
+          const lm = results.landmarks[0]
+
+          const leftShoulder = lm[11]
+          const rightShoulder = lm[12]
+          const leftHip = lm[23]
+          const rightHip = lm[24]
+
+          if (leftShoulder && rightShoulder && leftHip && rightHip) {
+            const lsx = leftShoulder.x * width
+            const lsy = leftShoulder.y * height
+            const rsx = rightShoulder.x * width
+            const rsy = rightShoulder.y * height
+            const lhx = leftHip.x * width
+            const lhy = leftHip.y * height
+            const rhx = rightHip.x * width
+            const rhy = rightHip.y * height
+
+            const shoulderCenterX = (lsx + rsx) / 2
+            const shoulderCenterY = (lsy + rsy) / 2
+            const hipCenterY = (lhy + rhy) / 2
+
+            const shoulderWidth = Math.abs(rsx - lsx)
+            const torsoHeight = Math.abs(hipCenterY - shoulderCenterY)
+            const bodyAngle = Math.atan2(rsy - lsy, rsx - lsx)
+
+            const scale = SIZE_SCALE[selectedSize] || 1
+
+            const garmentWidth = shoulderWidth * 2.05 * scale
+            const garmentHeight = torsoHeight * 2.45 * scale
+
+            ctx.save()
+            ctx.translate(
+              shoulderCenterX,
+              shoulderCenterY + torsoHeight * 0.22
+            )
+            ctx.rotate(-bodyAngle)
+
+            ctx.drawImage(
+              garmentImage,
+              -garmentWidth / 2,
+              -garmentHeight / 3,
+              garmentWidth,
+              garmentHeight
+            )
+
+            ctx.restore()
+          }
         }
       }
-      reader.readAsDataURL(file)
+
+      ctx.restore()
+      animationFrameRef.current = requestAnimationFrame(renderFrame)
     }
-  }
 
-  const handleGenerate = async () => {
-    if (!height || !weight || !userImage) return alert("Please fill in your metrics.")
-    setStep('uploading') 
-    
-    try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base64Image: userImage }),
-      })
-      
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Upload failed");
+    loadEngine()
 
-      // NEW NUMBER APPLIED: 201016286261
-      const message = `*SWAY STUDIO | VIRTUAL FITTING REQUEST*%0A%0A` +
-                      `*Item:* ${productName}%0A` +
-                      `*Size Chosen:* ${selectedSize}%0A` +
-                      `*Body Metrics:* ${height}cm | ${weight}kg%0A%0A` +
-                      `*GUIDE CALIBRATION:* Apply ${selectedSize} hoodie dimensions to a ${height}cm frame.%0A%0A` +
-                      `*FITTING IMAGE:* ${result.url}`;
+    return () => {
+      mounted = false
 
-      window.open(`https://api.whatsapp.com/send?phone=201016286261&text=${message}`, '_blank');
-      setStep('success')
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
 
-    } catch (error: any) {
-      alert(`Error: ${error.message}`);
-      setStep('capture')
+      if (poseLandmarkerRef.current) {
+        poseLandmarkerRef.current.close()
+      }
+
+      if (videoRef.current?.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream
+        stream.getTracks().forEach((track) => track.stop())
+      }
+
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((track) => track.stop())
+      }
     }
-  }
+  }, [itemUrl, selectedSize])
 
   return (
     <div className="w-full mt-6">
-      {/* STEP 2: CAPTURE */}
-      {step === 'capture' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6 flex flex-col items-center">
-          {cameraError && <p className="text-red-500 text-[9px] uppercase font-bold mb-4 text-center px-4">{cameraError}</p>}
-          
-          <div className="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden flex items-center justify-center border border-zinc-800">
-            {isCameraActive ? (
-              <>
-                <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover transform -scale-x-100" />
-                <button onClick={takePhoto} className="absolute bottom-6 w-16 h-16 bg-white rounded-full border-4 border-cyan-400 shadow-xl" />
-              </>
-            ) : (
-              <div className="flex flex-col gap-4">
-                <button onClick={startCamera} className="bg-cyan-400 text-black px-10 py-4 rounded-full font-black uppercase text-[10px]">Open Camera</button>
-                <label className="border border-zinc-700 text-white px-10 py-4 rounded-full font-black uppercase text-[10px] text-center cursor-pointer">
-                  Upload Photo
-                  <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                </label>
+      <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6">
+        <div className="flex items-center justify-between gap-4 mb-5">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
+              Live AI Fitting
+            </p>
+            <h3 className="text-sm md:text-base font-[1000] uppercase text-white tracking-tight">
+              {productName}
+            </h3>
+          </div>
+
+          <div className="w-12 h-12 rounded-xl border-2 border-cyan-400 bg-cyan-400/10 text-cyan-400 flex items-center justify-center font-[1000] text-sm shadow-[0_0_20px_rgba(34,211,238,0.15)]">
+            {selectedSize}
+          </div>
+        </div>
+
+        {isLoading && (
+          <div className="mb-4 rounded-2xl border border-cyan-400/20 bg-cyan-400/5 px-4 py-3 text-center">
+            <p className="text-[10px] uppercase font-black tracking-widest text-cyan-400 animate-pulse">
+              Starting camera and fitting engine...
+            </p>
+          </div>
+        )}
+
+        {cameraError && (
+          <div className="mb-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-center">
+            <p className="text-[10px] uppercase font-black tracking-wide text-red-400">
+              {cameraError}
+            </p>
+            <p className="text-[10px] text-zinc-500 mt-2">
+              Make sure camera permission is allowed and the site runs on
+              localhost or HTTPS.
+            </p>
+          </div>
+        )}
+
+        <div className="relative w-full aspect-[3/4] bg-black rounded-[24px] overflow-hidden border border-zinc-800">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="hidden"
+          />
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full object-cover"
+          />
+
+          {!isCameraReady && !cameraError && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center px-6">
+                <div className="w-14 h-14 border-t-4 border-cyan-400 rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+                  Preparing studio
+                </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* STEP 3: METRICS */}
-      {step === 'metrics' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6">
-          <div className="flex items-center gap-3 mb-6">
-             <div className="w-10 h-10 rounded-full bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400 font-bold text-xs">
-                {selectedSize}
-             </div>
-             <div>
-                <p className="text-[10px] text-zinc-500 font-black uppercase">Selected Size</p>
-                <p className="text-xs text-white font-bold uppercase tracking-tight">{productName}</p>
-             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <input type="number" placeholder="Height (cm)" value={height} onChange={(e) => setHeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white outline-none focus:border-cyan-400" />
-            <input type="number" placeholder="Weight (kg)" value={weight} onChange={(e) => setWeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white outline-none focus:border-cyan-400" />
-          </div>
-          <button onClick={handleGenerate} className="w-full bg-cyan-400 text-black py-5 rounded-full font-black uppercase text-xs tracking-widest shadow-xl">Confirm & Generate Fitting</button>
+        <div className="mt-4 rounded-2xl border border-white/5 bg-black/40 p-4">
+          <p className="text-[10px] uppercase font-black tracking-[0.25em] text-zinc-500 mb-2">
+            Best Result Tips
+          </p>
+          <ul className="text-[11px] text-zinc-400 space-y-1 leading-relaxed">
+            <li>• Stand centered in front of the camera</li>
+            <li>• Keep shoulders and upper body visible</li>
+            <li>• Use a transparent PNG product image</li>
+            <li>• Good lighting improves the fit alignment</li>
+          </ul>
         </div>
-      )}
-
-      {/* STEP 4: UPLOADING */}
-      {step === 'uploading' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-16 flex flex-col items-center">
-          <div className="w-12 h-12 border-t-4 border-cyan-400 rounded-full animate-spin mb-4" />
-          <p className="text-cyan-400 font-black italic uppercase animate-pulse">Syncing Metrics...</p>
-        </div>
-      )}
-
-      {/* STEP 5: SUCCESS */}
-      {step === 'success' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-8 text-center">
-          <div className="w-16 h-16 bg-cyan-400 text-black rounded-full flex items-center justify-center text-2xl mx-auto mb-4 font-black">✓</div>
-          <h3 className="text-xl font-black text-white uppercase mb-4">Request Sent!</h3>
-          <p className="text-[10px] text-zinc-500 uppercase font-black mb-6">Check WhatsApp for your AI render.</p>
-          <button onClick={() => setStep('capture')} className="text-zinc-500 font-black uppercase text-[10px]">Back</button>
-        </div>
-      )}
+      </div>
     </div>
   )
 }
