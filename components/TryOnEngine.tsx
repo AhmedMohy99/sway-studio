@@ -26,7 +26,7 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
         videoRef.current.srcObject = stream
         setIsCameraActive(true)
       }
-    } catch (err) { alert("Camera access denied.") }
+    } catch (err) { alert("Camera access denied. Use upload.") }
   }
 
   const stopCamera = () => {
@@ -75,7 +75,7 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
   }
 
   const handleGenerate = async () => {
-    if (!height || !weight || !userImage) return alert("Missing metrics.")
+    if (!height || !weight || !userImage) return alert("Please enter height and weight.")
     setStep('uploading') 
     
     try {
@@ -85,44 +85,45 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
         body: JSON.stringify({ base64Image: userImage }),
       })
       
+      const result = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Server Error ${response.status}`);
+        throw new Error(result.error || "Connection error");
       }
 
-      const uploadData = await response.json()
-      
-      const message = `*SWAY STUDIO AI FITTING*%0A%0A` +
+      // Format WhatsApp message with the Public URL
+      const message = `*NEW SWAY FITTING REQUEST*%0A%0A` +
                       `*Product:* ${productName}%0A` +
                       `*Size:* ${selectedSize}%0A` +
-                      `*Height:* ${height}cm | *Weight:* ${weight}kg%0A%0A` +
-                      `*Photo:* ${uploadData.url}`;
+                      `*User Metrics:* ${height}cm, ${weight}kg%0A%0A` +
+                      `*User Photo:* ${result.url}`;
 
       window.open(`https://api.whatsapp.com/send?phone=201033866838&text=${message}`, '_blank');
       setStep('success')
 
     } catch (error: any) {
       console.error(error)
-      alert(`FIX THIS: ${error.message}. Make sure BLOB_READ_WRITE_TOKEN is in Vercel Settings.`);
+      alert(`CRITICAL ERROR: ${error.message}`);
       setStep('capture')
     }
   }
 
   return (
     <div className="w-full mt-6">
+      {/* CAPTURE */}
       {step === 'capture' && (
         <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6 flex flex-col items-center">
           <div className="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden flex items-center justify-center">
             {isCameraActive ? (
               <>
                 <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover transform -scale-x-100" />
-                <button onClick={takePhoto} className="absolute bottom-6 w-16 h-16 bg-white rounded-full border-4 border-cyan-400" />
+                <button onClick={takePhoto} className="absolute bottom-6 w-16 h-16 bg-white rounded-full border-4 border-cyan-400 shadow-xl" />
               </>
             ) : (
               <div className="flex flex-col gap-4">
-                <button onClick={startCamera} className="bg-cyan-400 text-black px-8 py-4 rounded-full font-black uppercase text-[10px]">Open Camera</button>
-                <label className="border border-zinc-700 text-white px-8 py-4 rounded-full font-black uppercase text-[10px] text-center cursor-pointer">
-                  Upload
+                <button onClick={startCamera} className="bg-cyan-400 text-black px-10 py-4 rounded-full font-black uppercase text-[10px]">Open Camera</button>
+                <label className="border border-zinc-700 text-white px-10 py-4 rounded-full font-black uppercase text-[10px] text-center cursor-pointer">
+                  Upload Photo
                   <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
                 </label>
               </div>
@@ -131,27 +132,36 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
         </div>
       )}
 
+      {/* METRICS */}
       {step === 'metrics' && (
         <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6">
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <input type="number" placeholder="Height" value={height} onChange={(e) => setHeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white outline-none" />
-            <input type="number" placeholder="Weight" value={weight} onChange={(e) => setWeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white outline-none" />
+          <div className="flex justify-between items-center mb-6">
+            <p className="text-[10px] font-black uppercase text-cyan-400 tracking-widest">3. Body Calibration</p>
+            <button onClick={() => { setStep('capture'); setUserImage(null); }} className="text-[9px] text-zinc-500 uppercase font-black">Retake</button>
           </div>
-          <button onClick={handleGenerate} className="w-full bg-cyan-400 text-black py-5 rounded-full font-black uppercase">Generate AI Fitting</button>
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <input type="number" placeholder="Height (cm)" value={height} onChange={(e) => setHeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white focus:border-cyan-400 outline-none" />
+            <input type="number" placeholder="Weight (kg)" value={weight} onChange={(e) => setWeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white focus:border-cyan-400 outline-none" />
+          </div>
+          <button onClick={handleGenerate} className="w-full bg-cyan-400 text-black py-5 rounded-full font-black uppercase text-xs tracking-widest shadow-lg">Generate AI Fitting</button>
         </div>
       )}
 
+      {/* LOADING */}
       {step === 'uploading' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-12 flex flex-col items-center">
-          <div className="w-12 h-12 border-t-4 border-cyan-400 rounded-full animate-spin mb-4" />
-          <p className="text-cyan-400 font-black italic uppercase">Syncing Metrics...</p>
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-16 flex flex-col items-center">
+          <div className="w-12 h-12 border-t-4 border-cyan-400 rounded-full animate-spin mb-6" />
+          <h3 className="text-cyan-400 font-black italic uppercase animate-pulse">Syncing Metrics...</h3>
         </div>
       )}
 
+      {/* SUCCESS */}
       {step === 'success' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-8 text-center">
-          <h3 className="text-xl font-black text-white uppercase mb-4">Request Sent!</h3>
-          <button onClick={() => setStep('capture')} className="text-zinc-500 uppercase font-black text-[10px]">Try Another</button>
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-10 text-center animate-in fade-in zoom-in">
+          <div className="w-16 h-16 bg-cyan-400 text-black rounded-full flex items-center justify-center text-2xl mx-auto mb-4 font-black">✓</div>
+          <h3 className="text-xl font-black text-white uppercase mb-2">Request Sent!</h3>
+          <p className="text-[10px] text-zinc-400 uppercase font-bold mb-6">Check WhatsApp for your AI render.</p>
+          <button onClick={() => setStep('capture')} className="text-zinc-500 font-black uppercase text-[10px] border border-white/10 px-6 py-2 rounded-full">Try Another</button>
         </div>
       )}
     </div>
