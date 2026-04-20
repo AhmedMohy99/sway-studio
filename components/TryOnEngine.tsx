@@ -20,7 +20,6 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
 
   useEffect(() => { return () => stopCamera() }, [])
 
-  // Robust Camera Start
   const startCamera = async () => {
     setCameraError(null)
     try {
@@ -37,7 +36,7 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
       }
     } catch (err: any) {
       console.error(err)
-      setCameraError("Camera access denied. Please check site permissions in your browser settings or try 'Upload Photo'.")
+      setCameraError("Camera access denied. Please allow camera permissions or use 'Upload Photo'.")
     }
   }
 
@@ -54,7 +53,6 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current
       const canvas = canvasRef.current
-      // Compression for speed (Real-time feeling)
       const scale = 800 / video.videoWidth;
       canvas.width = 800;
       canvas.height = video.videoHeight * scale;
@@ -101,7 +99,7 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Upload failed");
 
-      // REAL-TIME LOGIC: Combine Size Guide + Selection + Metrics
+      // NEW NUMBER APPLIED: 201016286261
       const message = `*SWAY STUDIO | VIRTUAL FITTING REQUEST*%0A%0A` +
                       `*Item:* ${productName}%0A` +
                       `*Size Chosen:* ${selectedSize}%0A` +
@@ -109,7 +107,7 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
                       `*GUIDE CALIBRATION:* Apply ${selectedSize} hoodie dimensions to a ${height}cm frame.%0A%0A` +
                       `*FITTING IMAGE:* ${result.url}`;
 
-      window.open(`https://api.whatsapp.com/send?phone=201033866838&text=${message}`, '_blank');
+      window.open(`https://api.whatsapp.com/send?phone=201016286261&text=${message}`, '_blank');
       setStep('success')
 
     } catch (error: any) {
@@ -120,6 +118,7 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
 
   return (
     <div className="w-full mt-6">
+      {/* STEP 2: CAPTURE */}
       {step === 'capture' && (
         <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6 flex flex-col items-center">
           {cameraError && <p className="text-red-500 text-[9px] uppercase font-bold mb-4 text-center px-4">{cameraError}</p>}
@@ -128,7 +127,7 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
             {isCameraActive ? (
               <>
                 <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover transform -scale-x-100" />
-                <button onClick={takePhoto} className="absolute bottom-6 w-16 h-16 bg-white rounded-full border-4 border-cyan-400" />
+                <button onClick={takePhoto} className="absolute bottom-6 w-16 h-16 bg-white rounded-full border-4 border-cyan-400 shadow-xl" />
               </>
             ) : (
               <div className="flex flex-col gap-4">
@@ -143,6 +142,7 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
         </div>
       )}
 
+      {/* STEP 3: METRICS */}
       {step === 'metrics' && (
         <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6">
           <div className="flex items-center gap-3 mb-6">
@@ -162,6 +162,7 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
         </div>
       )}
 
+      {/* STEP 4: UPLOADING */}
       {step === 'uploading' && (
         <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-16 flex flex-col items-center">
           <div className="w-12 h-12 border-t-4 border-cyan-400 rounded-full animate-spin mb-4" />
@@ -169,8 +170,9 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
         </div>
       )}
 
+      {/* STEP 5: SUCCESS */}
       {step === 'success' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-8 text-center animate-in fade-in zoom-in">
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-8 text-center">
           <div className="w-16 h-16 bg-cyan-400 text-black rounded-full flex items-center justify-center text-2xl mx-auto mb-4 font-black">✓</div>
           <h3 className="text-xl font-black text-white uppercase mb-4">Request Sent!</h3>
           <p className="text-[10px] text-zinc-500 uppercase font-black mb-6">Check WhatsApp for your AI render.</p>
