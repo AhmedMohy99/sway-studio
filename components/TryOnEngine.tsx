@@ -12,32 +12,22 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
   const [userImage, setUserImage] = useState<string | null>(null)
   const [height, setHeight] = useState('')
   const [weight, setWeight] = useState('')
-  const [cameraError, setCameraError] = useState<string | null>(null)
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isCameraActive, setIsCameraActive] = useState(false)
+  const whatsappNumber = "201016286261";
 
   useEffect(() => { return () => stopCamera() }, [])
 
   const startCamera = async () => {
-    setCameraError(null)
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: 'user',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        } 
-      })
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         setIsCameraActive(true)
       }
-    } catch (err: any) {
-      console.error(err)
-      setCameraError("Camera access denied. Please allow camera permissions or use 'Upload Photo'.")
-    }
+    } catch (err) { alert("Camera access denied. Please use 'Upload Photo'.") }
   }
 
   const stopCamera = () => {
@@ -86,7 +76,7 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
   }
 
   const handleGenerate = async () => {
-    if (!height || !weight || !userImage) return alert("Please fill in your metrics.")
+    if (!height || !weight || !userImage) return alert("Please fill in height and weight.")
     setStep('uploading') 
     
     try {
@@ -99,15 +89,14 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Upload failed");
 
-      // NEW NUMBER APPLIED: 201016286261
-      const message = `*SWAY STUDIO | VIRTUAL FITTING REQUEST*%0A%0A` +
-                      `*Item:* ${productName}%0A` +
+      // FITTING DATA TEMPLATE
+      const message = `*SWAY STUDIO | FITTING DATA*%0A%0A` +
+                      `*Product:* ${productName}%0A` +
                       `*Size Chosen:* ${selectedSize}%0A` +
-                      `*Body Metrics:* ${height}cm | ${weight}kg%0A%0A` +
-                      `*GUIDE CALIBRATION:* Apply ${selectedSize} hoodie dimensions to a ${height}cm frame.%0A%0A` +
-                      `*FITTING IMAGE:* ${result.url}`;
+                      `*Metrics:* ${height}cm | ${weight}kg%0A%0A` +
+                      `*USER PHOTO:* ${result.url}`;
 
-      window.open(`https://api.whatsapp.com/send?phone=201016286261&text=${message}`, '_blank');
+      window.open(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`, '_blank');
       setStep('success')
 
     } catch (error: any) {
@@ -117,13 +106,10 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
   }
 
   return (
-    <div className="w-full mt-6">
-      {/* STEP 2: CAPTURE */}
+    <div className="w-full">
       {step === 'capture' && (
         <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6 flex flex-col items-center">
-          {cameraError && <p className="text-red-500 text-[9px] uppercase font-bold mb-4 text-center px-4">{cameraError}</p>}
-          
-          <div className="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden flex items-center justify-center border border-zinc-800">
+          <div className="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden border border-zinc-800 flex items-center justify-center">
             {isCameraActive ? (
               <>
                 <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover transform -scale-x-100" />
@@ -131,8 +117,8 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
               </>
             ) : (
               <div className="flex flex-col gap-4">
-                <button onClick={startCamera} className="bg-cyan-400 text-black px-10 py-4 rounded-full font-black uppercase text-[10px]">Open Camera</button>
-                <label className="border border-zinc-700 text-white px-10 py-4 rounded-full font-black uppercase text-[10px] text-center cursor-pointer">
+                <button onClick={startCamera} className="bg-cyan-400 text-black px-10 py-4 rounded-full font-black uppercase text-[10px] tracking-widest shadow-lg">Open Camera</button>
+                <label className="border border-zinc-700 text-white px-10 py-4 rounded-full font-black uppercase text-[10px] text-center cursor-pointer hover:border-white transition-colors">
                   Upload Photo
                   <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
                 </label>
@@ -142,41 +128,28 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
         </div>
       )}
 
-      {/* STEP 3: METRICS */}
       {step === 'metrics' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6">
-          <div className="flex items-center gap-3 mb-6">
-             <div className="w-10 h-10 rounded-full bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400 font-bold text-xs">
-                {selectedSize}
-             </div>
-             <div>
-                <p className="text-[10px] text-zinc-500 font-black uppercase">Selected Size</p>
-                <p className="text-xs text-white font-bold uppercase tracking-tight">{productName}</p>
-             </div>
-          </div>
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6 animate-in fade-in zoom-in">
           <div className="grid grid-cols-2 gap-4 mb-8">
-            <input type="number" placeholder="Height (cm)" value={height} onChange={(e) => setHeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white outline-none focus:border-cyan-400" />
-            <input type="number" placeholder="Weight (kg)" value={weight} onChange={(e) => setWeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white outline-none focus:border-cyan-400" />
+            <input type="number" placeholder="Height" value={height} onChange={(e) => setHeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white outline-none focus:border-cyan-400" />
+            <input type="number" placeholder="Weight" value={weight} onChange={(e) => setWeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white outline-none focus:border-cyan-400" />
           </div>
-          <button onClick={handleGenerate} className="w-full bg-cyan-400 text-black py-5 rounded-full font-black uppercase text-xs tracking-widest shadow-xl">Confirm & Generate Fitting</button>
+          <button onClick={handleGenerate} className="w-full bg-cyan-400 text-black py-5 rounded-full font-black uppercase text-xs tracking-widest shadow-xl">Generate AI Fitting</button>
         </div>
       )}
 
-      {/* STEP 4: UPLOADING */}
       {step === 'uploading' && (
         <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-16 flex flex-col items-center">
           <div className="w-12 h-12 border-t-4 border-cyan-400 rounded-full animate-spin mb-4" />
-          <p className="text-cyan-400 font-black italic uppercase animate-pulse">Syncing Metrics...</p>
+          <p className="text-cyan-400 font-black italic uppercase">Syncing Metrics...</p>
         </div>
       )}
 
-      {/* STEP 5: SUCCESS */}
       {step === 'success' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-8 text-center">
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-10 text-center animate-in fade-in zoom-in">
           <div className="w-16 h-16 bg-cyan-400 text-black rounded-full flex items-center justify-center text-2xl mx-auto mb-4 font-black">✓</div>
-          <h3 className="text-xl font-black text-white uppercase mb-4">Request Sent!</h3>
-          <p className="text-[10px] text-zinc-500 uppercase font-black mb-6">Check WhatsApp for your AI render.</p>
-          <button onClick={() => setStep('capture')} className="text-zinc-500 font-black uppercase text-[10px]">Back</button>
+          <h3 className="text-xl font-black text-white uppercase mb-2">Request Sent!</h3>
+          <p className="text-[10px] text-zinc-500 uppercase font-black">Check WhatsApp for your AI render.</p>
         </div>
       )}
     </div>
