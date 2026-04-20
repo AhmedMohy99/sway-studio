@@ -50,12 +50,16 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current
       const canvas = canvasRef.current
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
+      // Resize for performance: 800px width is plenty for AI but much faster to upload
+      const scale = 800 / video.videoWidth;
+      canvas.width = 800;
+      canvas.height = video.videoHeight * scale;
+
       const context = canvas.getContext('2d')
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height)
-        const base64Data = canvas.toDataURL('image/jpeg', 0.8) 
+        // Compress to 0.6 quality to keep file size under Vercel limits
+        const base64Data = canvas.toDataURL('image/jpeg', 0.6) 
         setUserImage(base64Data)
         stopCamera()
         setStep('metrics')
@@ -68,8 +72,22 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
     if (file) {
       const reader = new FileReader()
       reader.onloadend = () => {
-        setUserImage(reader.result as string)
-        setStep('metrics')
+        // Create an image object to resize the upload too
+        const img = new Image();
+        img.src = reader.result as string;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const max_size = 800;
+            let width = img.width;
+            let height = img.height;
+            if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } }
+            else { if (height > max_size) { width *= max_size / height; height = max_size; } }
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d')?.drawImage(img, 0, 0, width, height);
+            setUserImage(canvas.toDataURL('image/jpeg', 0.6));
+            setStep('metrics');
+        }
       }
       reader.readAsDataURL(file)
     }
@@ -79,29 +97,31 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
     if (!height || !weight || !userImage) return alert("Please enter height and weight.")
     setStep('uploading') 
     
+    // Add a timeout to the fetch so it doesn't hang forever
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 seconds limit
+
     try {
-      // 1. Upload the photo to Vercel Blob via your API
       const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base64Image: userImage })
+        body: JSON.stringify({ base64Image: userImage }),
+        signal: controller.signal
       })
       
+      clearTimeout(timeoutId);
       const uploadData = await uploadResponse.json()
+      
       if (!uploadData.url) throw new Error("Upload failed")
 
-      // 2. Sizing Logic Calculation
       const recommendedSize = getSuggestedSize(parseInt(height));
       const sizeMismatch = selectedSize !== recommendedSize;
 
-      // 3. Format the WhatsApp Message with specific fitting instructions
       const message = `*SWAY STUDIO AI FITTING*%0A%0A` +
                       `*Product:* ${productName}%0A` +
                       `*User Selection:* ${selectedSize}%0A` +
                       `*Calculated Suggestion:* ${recommendedSize}%0A` +
                       `*Height:* ${height}cm | *Weight:* ${weight}kg%0A%0A` +
-                      `*Fitting Instructions:* %0A` +
-                      `${sizeMismatch ? "- Adjust for custom oversized fit" : "- Standard brand fit"}%0A%0A` +
                       `*Customer Photo:* ${uploadData.url}%0A%0A` +
                       `Generate fitting based on ${selectedSize} guide dimensions.`;
 
@@ -110,9 +130,13 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
 
       setStep('success')
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
-      alert("Something went wrong. Please check your internet connection.")
+      if (error.name === 'AbortError') {
+        alert("Upload took too long. Try a different photo or check your connection.");
+      } else {
+        alert("Network error. Make sure your Vercel Environment Variables are set.");
+      }
       setStep('capture')
     }
   }
@@ -145,31 +169,25 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
         </div>
       )}
 
-      {/* STEP 3: METRICS & SIZE CALIBRATION */}
+      {/* STEP 3: METRICS */}
       {step === 'metrics' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6 animate-in fade-in zoom-in duration-300">
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6 animate-in fade-in zoom-in">
           <div className="flex justify-between items-center mb-6">
             <p className="text-[10px] font-black uppercase text-cyan-400 tracking-[0.3em]">3. Body Calibration</p>
             <button onClick={() => { setStep('capture'); setUserImage(null); }} className="text-[9px] uppercase tracking-widest text-zinc-500 hover:text-white font-bold">Retake</button>
           </div>
           <div className="flex gap-4 mb-8">
-            {userImage && <img src={userImage} className="w-20 h-24 object-cover rounded-xl border border-white/20 shadow-xl" alt="User" /> }
+            {userImage && <img src={userImage} className="w-20 h-24 object-cover rounded-xl border border-white/20" alt="User" /> }
             <div className="flex flex-col justify-center">
                 <p className="text-[10px] text-zinc-400 uppercase font-bold">Target Size</p>
                 <p className="text-2xl font-black text-white italic">{selectedSize}</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="space-y-2">
-                <label className="text-[8px] uppercase text-zinc-500 font-black ml-2">Height (cm)</label>
-                <input type="number" placeholder="180" value={height} onChange={(e) => setHeight(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-white text-sm focus:border-cyan-400 outline-none transition-colors" />
-            </div>
-            <div className="space-y-2">
-                <label className="text-[8px] uppercase text-zinc-500 font-black ml-2">Weight (kg)</label>
-                <input type="number" placeholder="75" value={weight} onChange={(e) => setWeight(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-white text-sm focus:border-cyan-400 outline-none transition-colors" />
-            </div>
+            <input type="number" placeholder="Height (cm)" value={height} onChange={(e) => setHeight(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-white text-sm focus:border-cyan-400 outline-none" />
+            <input type="number" placeholder="Weight (kg)" value={weight} onChange={(e) => setWeight(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-white text-sm focus:border-cyan-400 outline-none" />
           </div>
-          <button onClick={handleGenerate} className="w-full bg-cyan-400 text-black py-5 rounded-full text-xs font-[1000] uppercase tracking-widest shadow-[0_0_20px_rgba(0,245,255,0.3)] hover:scale-[0.98] active:scale-95 transition-all">
+          <button onClick={handleGenerate} className="w-full bg-cyan-400 text-black py-5 rounded-full text-xs font-[1000] uppercase tracking-widest shadow-[0_0_20px_rgba(0,245,255,0.3)]">
             Generate AI Fitting
           </button>
         </div>
@@ -177,26 +195,22 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
 
       {/* STEP 4: UPLOADING */}
       {step === 'uploading' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-12 flex flex-col items-center justify-center min-h-[300px]">
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-12 flex flex-col items-center justify-center">
           <div className="relative w-16 h-16 mb-6">
             <div className="absolute inset-0 border-t-4 border-cyan-400 rounded-full animate-spin"></div>
-            <div className="absolute inset-2 border-t-4 border-cyan-400/30 rounded-full animate-spin-slow"></div>
           </div>
-          <h3 className="text-lg font-[1000] italic text-cyan-400 uppercase tracking-tighter animate-pulse">Syncing Metrics...</h3>
-          <p className="text-[9px] text-zinc-500 uppercase font-bold mt-2">Uploading to Sway Cloud</p>
+          <h3 className="text-lg font-[1000] italic text-cyan-400 uppercase tracking-tighter">Syncing Metrics...</h3>
         </div>
       )}
 
       {/* STEP 5: SUCCESS */}
       {step === 'success' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-8 text-center animate-in fade-in slide-in-from-bottom-4">
-          <div className="w-16 h-16 bg-cyan-400/20 text-cyan-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 border border-cyan-400 shadow-[0_0_20px_rgba(0,245,255,0.2)]">✓</div>
-          <h3 className="text-xl font-[1000] italic text-white mb-2 uppercase tracking-tight">Fitting Sent!</h3>
-          <p className="text-[10px] text-zinc-400 tracking-widest mb-6 uppercase font-bold leading-relaxed">
-            Please check your WhatsApp.<br/>Your custom AI render is being processed.
-          </p>
-          <button onClick={() => setStep('capture')} className="text-[10px] font-black tracking-widest text-zinc-500 uppercase hover:text-white border border-white/10 px-6 py-3 rounded-full transition-colors">
-            Try Another Item
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-8 text-center">
+          <div className="w-16 h-16 bg-cyan-400/20 text-cyan-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 border border-cyan-400">✓</div>
+          <h3 className="text-xl font-[1000] italic text-white mb-2 uppercase">Request Sent!</h3>
+          <p className="text-[10px] text-zinc-400 tracking-widest mb-6 uppercase font-bold">Check your WhatsApp for the AI render.</p>
+          <button onClick={() => setStep('capture')} className="text-[10px] font-black tracking-widest text-zinc-500 uppercase hover:text-white border border-white/10 px-6 py-3 rounded-full">
+            Start Over
           </button>
         </div>
       )}
