@@ -19,17 +19,3 @@ The system uses a custom-built capture engine to collect user metrics (height an
 * **Styling:** Tailwind CSS
 * **Storage:** Vercel Blob (@vercel/blob)
 * **Communication:** WhatsApp Business API (URL-based triggers)
-
----
-
-## ⚙️ Step-by-Step Setup Guide
-
-Follow these instructions to set up the Sway Studio environment locally and deploy it to production.
-
-### Step 1: Clone and Install
-Clone the repository to your local machine and install the required dependencies.
-
-```bash
-git clone <your-repository-url>
-cd sway-studio
-npm install
