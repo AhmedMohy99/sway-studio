@@ -1,25 +1,26 @@
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const { base64Image } = await req.json();
+    const { base64Image } = await request.json();
+    
+    if (!base64Image) {
+      return NextResponse.json({ error: "No image data" }, { status: 400 });
+    }
 
-    // 1. Extract the raw data
-    const base64Data = base64Image.split(',')[1];
+    // Convert base64 string to a buffer the cloud can understand
+    const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, 'base64');
 
-    // 2. Upload with a unique timestamp to your NEW PUBLIC BLOB
-    const blob = await put(`sway-request-${Date.now()}.jpg`, buffer, {
-      access: 'public', // This MUST be public
-      contentType: 'image/jpeg',
+    // Upload to Vercel Blob
+    const blob = await put(`sway-studio/fitting-${Date.now()}.jpg`, buffer, {
+      access: 'public', // Must be public for AI to see it
     });
 
-    return NextResponse.json({ url: blob.url });
-
-  } catch (error) {
-    console.error("Upload Error:", error);
-    // This will show exactly why it failed in your Vercel Logs
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json(blob);
+  } catch (error: any) {
+    console.error("Upload error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
