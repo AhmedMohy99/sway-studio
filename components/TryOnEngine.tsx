@@ -1,7 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision'
+import {
+  DrawingUtils,
+  FilesetResolver,
+  PoseLandmarker,
+} from '@mediapipe/tasks-vision'
 
 interface TryOnProps {
   itemUrl: string
@@ -32,6 +36,8 @@ export default function TryOnEngine({
   const [isLoading, setIsLoading] = useState(true)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [isCameraReady, setIsCameraReady] = useState(false)
+  const [poseDetected, setPoseDetected] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -41,6 +47,10 @@ export default function TryOnEngine({
       try {
         setIsLoading(true)
         setCameraError(null)
+        setPoseDetected(false)
+        setImageLoaded(false)
+
+        console.log('TryOnEngine itemUrl:', itemUrl)
 
         const vision = await FilesetResolver.forVisionTasks(
           'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
@@ -62,7 +72,11 @@ export default function TryOnEngine({
         garmentImage.src = itemUrl
 
         await new Promise<void>((resolve, reject) => {
-          garmentImage.onload = () => resolve()
+          garmentImage.onload = () => {
+            console.log('Garment image loaded:', itemUrl)
+            setImageLoaded(true)
+            resolve()
+          }
           garmentImage.onerror = () =>
             reject(
               new Error(
@@ -102,7 +116,7 @@ export default function TryOnEngine({
       }
     }
 
-    const renderFrame = async () => {
+    const renderFrame = () => {
       const video = videoRef.current
       const canvas = canvasRef.current
       const poseLandmarker = poseLandmarkerRef.current
@@ -134,11 +148,12 @@ export default function TryOnEngine({
 
       ctx.clearRect(0, 0, width, height)
 
-      // mirror preview like selfie camera
       ctx.save()
       ctx.translate(width, 0)
       ctx.scale(-1, 1)
       ctx.drawImage(video, 0, 0, width, height)
+
+      let shouldersFound = false
 
       if (video.currentTime !== lastVideoTimeRef.current) {
         lastVideoTimeRef.current = video.currentTime
@@ -147,6 +162,9 @@ export default function TryOnEngine({
 
         if (results.landmarks && results.landmarks.length > 0) {
           const lm = results.landmarks[0]
+          const drawingUtils = new DrawingUtils(ctx)
+
+          drawingUtils.drawLandmarks(lm, { radius: 3 })
 
           const leftShoulder = lm[11]
           const rightShoulder = lm[12]
@@ -154,13 +172,14 @@ export default function TryOnEngine({
           const rightHip = lm[24]
 
           if (leftShoulder && rightShoulder && leftHip && rightHip) {
+            shouldersFound = true
+            setPoseDetected(true)
+
             const lsx = leftShoulder.x * width
             const lsy = leftShoulder.y * height
             const rsx = rightShoulder.x * width
             const rsy = rightShoulder.y * height
-            const lhx = leftHip.x * width
             const lhy = leftHip.y * height
-            const rhx = rightHip.x * width
             const rhy = rightHip.y * height
 
             const shoulderCenterX = (lsx + rsx) / 2
@@ -194,6 +213,10 @@ export default function TryOnEngine({
             ctx.restore()
           }
         }
+      }
+
+      if (!shouldersFound && isCameraReady) {
+        setPoseDetected(false)
       }
 
       ctx.restore()
@@ -258,6 +281,25 @@ export default function TryOnEngine({
             <p className="text-[10px] text-zinc-500 mt-2">
               Make sure camera permission is allowed and the site runs on
               localhost or HTTPS.
+            </p>
+          </div>
+        )}
+
+        {!cameraError && isCameraReady && !poseDetected && (
+          <div className="mb-4 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-center">
+            <p className="text-[10px] uppercase font-black tracking-wide text-yellow-300">
+              Body not detected yet
+            </p>
+            <p className="text-[10px] text-zinc-500 mt-2">
+              Step back a little, show shoulders clearly, and use brighter light.
+            </p>
+          </div>
+        )}
+
+        {!cameraError && isCameraReady && !imageLoaded && (
+          <div className="mb-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-center">
+            <p className="text-[10px] uppercase font-black tracking-wide text-red-400">
+              Product image not loaded
             </p>
           </div>
         )}
