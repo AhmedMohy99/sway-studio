@@ -7,7 +7,7 @@ interface TryOnProps {
   productName?: string;
 }
 
-export default function TryOnEngine({ itemUrl, selectedSize = "L", productName = "Sway Studio Item" }: TryOnProps) {
+export default function TryOnEngine({ itemUrl, selectedSize = "L", productName = "Sway Maverick Item" }: TryOnProps) {
   const [step, setStep] = useState<'capture' | 'metrics' | 'uploading' | 'success'>('capture')
   const [userImage, setUserImage] = useState<string | null>(null)
   const [height, setHeight] = useState('')
@@ -26,7 +26,7 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
         videoRef.current.srcObject = stream
         setIsCameraActive(true)
       }
-    } catch (err) { alert("Camera access denied. Use upload.") }
+    } catch (err) { alert("Camera access denied.") }
   }
 
   const stopCamera = () => {
@@ -75,10 +75,11 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
   }
 
   const handleGenerate = async () => {
-    if (!height || !weight || !userImage) return alert("Please enter height and weight.")
+    if (!height || !weight || !userImage) return alert("Please fill in height/weight.")
     setStep('uploading') 
     
     try {
+      // Sending to our new API route
       const response = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,32 +89,32 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Connection error");
+        throw new Error(result.error || "Server error during upload");
       }
 
-      // Format WhatsApp message with the Public URL
-      const message = `*NEW SWAY FITTING REQUEST*%0A%0A` +
+      // Format the message for your team
+      const message = `*SWAY STUDIO FITTING REQUEST*%0A%0A` +
                       `*Product:* ${productName}%0A` +
-                      `*Size:* ${selectedSize}%0A` +
+                      `*Size Requested:* ${selectedSize}%0A` +
                       `*User Metrics:* ${height}cm, ${weight}kg%0A%0A` +
-                      `*User Photo:* ${result.url}`;
+                      `*FITTING URL:* ${result.url}`;
 
       window.open(`https://api.whatsapp.com/send?phone=201033866838&text=${message}`, '_blank');
       setStep('success')
 
     } catch (error: any) {
       console.error(error)
-      alert(`CRITICAL ERROR: ${error.message}`);
+      alert(`FINAL CHECK: ${error.message}. Is your project connected to Blob in Vercel?`);
       setStep('capture')
     }
   }
 
   return (
     <div className="w-full mt-6">
-      {/* CAPTURE */}
+      {/* CAPTURE STEP */}
       {step === 'capture' && (
         <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6 flex flex-col items-center">
-          <div className="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden flex items-center justify-center">
+          <div className="relative w-full aspect-[3/4] bg-black rounded-2xl overflow-hidden border border-zinc-800 flex items-center justify-center">
             {isCameraActive ? (
               <>
                 <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover transform -scale-x-100" />
@@ -132,36 +133,36 @@ export default function TryOnEngine({ itemUrl, selectedSize = "L", productName =
         </div>
       )}
 
-      {/* METRICS */}
+      {/* METRICS STEP */}
       {step === 'metrics' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6">
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6 animate-in fade-in zoom-in">
           <div className="flex justify-between items-center mb-6">
             <p className="text-[10px] font-black uppercase text-cyan-400 tracking-widest">3. Body Calibration</p>
             <button onClick={() => { setStep('capture'); setUserImage(null); }} className="text-[9px] text-zinc-500 uppercase font-black">Retake</button>
           </div>
           <div className="grid grid-cols-2 gap-4 mb-8">
-            <input type="number" placeholder="Height (cm)" value={height} onChange={(e) => setHeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white focus:border-cyan-400 outline-none" />
-            <input type="number" placeholder="Weight (kg)" value={weight} onChange={(e) => setWeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white focus:border-cyan-400 outline-none" />
+            <input type="number" placeholder="Height" value={height} onChange={(e) => setHeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white outline-none focus:border-cyan-400" />
+            <input type="number" placeholder="Weight" value={weight} onChange={(e) => setWeight(e.target.value)} className="bg-black border border-white/10 rounded-xl p-4 text-white outline-none focus:border-cyan-400" />
           </div>
-          <button onClick={handleGenerate} className="w-full bg-cyan-400 text-black py-5 rounded-full font-black uppercase text-xs tracking-widest shadow-lg">Generate AI Fitting</button>
+          <button onClick={handleGenerate} className="w-full bg-cyan-400 text-black py-5 rounded-full font-black uppercase text-xs tracking-widest">Generate AI Fitting</button>
         </div>
       )}
 
-      {/* LOADING */}
+      {/* SYNCING STEP */}
       {step === 'uploading' && (
-        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-16 flex flex-col items-center">
+        <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-16 flex flex-col items-center justify-center">
           <div className="w-12 h-12 border-t-4 border-cyan-400 rounded-full animate-spin mb-6" />
           <h3 className="text-cyan-400 font-black italic uppercase animate-pulse">Syncing Metrics...</h3>
         </div>
       )}
 
-      {/* SUCCESS */}
+      {/* SUCCESS STEP */}
       {step === 'success' && (
         <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-10 text-center animate-in fade-in zoom-in">
           <div className="w-16 h-16 bg-cyan-400 text-black rounded-full flex items-center justify-center text-2xl mx-auto mb-4 font-black">✓</div>
           <h3 className="text-xl font-black text-white uppercase mb-2">Request Sent!</h3>
-          <p className="text-[10px] text-zinc-400 uppercase font-bold mb-6">Check WhatsApp for your AI render.</p>
-          <button onClick={() => setStep('capture')} className="text-zinc-500 font-black uppercase text-[10px] border border-white/10 px-6 py-2 rounded-full">Try Another</button>
+          <p className="text-[10px] text-zinc-400 uppercase font-bold mb-8">Check WhatsApp for your AI render.</p>
+          <button onClick={() => setStep('capture')} className="text-zinc-500 font-black uppercase text-[10px] border border-white/10 px-8 py-3 rounded-full">Start New</button>
         </div>
       )}
     </div>
