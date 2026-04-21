@@ -184,11 +184,27 @@ I checked the size guide and I want to preorder this piece.`
               EGP {selectedProduct.price}.00
             </p>
 
-            <TryOnEngine
-              itemUrl={activeImage}
-              selectedSize={selectedSize}
-              productName={selectedProduct.name}
-            />
+           <div className="flex justify-center gap-3 mb-6 flex-wrap">
+  {(['S', 'M', 'L', 'XL', '2XL'] as const).map((s) => (
+    <button
+      key={s}
+      onClick={() => setSelectedSize(s)}
+      className={`w-12 h-12 border rounded-lg ${
+        selectedSize === s
+          ? 'border-cyan-400 text-cyan-400'
+          : 'border-white/10 text-gray-500'
+      }`}
+    >
+      {s}
+    </button>
+  ))}
+</div>
+
+<TryOnEngine
+  itemUrl={activeImage}
+  selectedSize={selectedSize}
+  productName={selectedProduct.name}
+/>
           </div>
         </div>
       )}
