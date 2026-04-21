@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import {
-  DrawingUtils,
   FilesetResolver,
   PoseLandmarker,
 } from '@mediapipe/tasks-vision'
@@ -16,38 +15,43 @@ interface TryOnProps {
 const SIZE_SCALE: Record<string, number> = {
   S: 0.9,
   M: 1,
-  L: 1.08,
-  XL: 1.16,
-  '2XL': 1.24,
+  L: 1.05,
+  XL: 1.12,
+  '2XL': 1.2,
 }
 
 export default function TryOnEngine({
   itemUrl,
   selectedSize = 'L',
-  productName = 'Sway Maverick Item',
+  productName,
 }: TryOnProps) {
-  const videoRef = useRef<HTMLVideoElement | null>(null)
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const poseLandmarkerRef = useRef<PoseLandmarker | null>(null)
-  const garmentImageRef = useRef<HTMLImageElement | null>(null)
-  const animationFrameRef = useRef<number | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const poseRef = useRef<PoseLandmarker | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const imageRef = useRef<HTMLImageElement | null>(null)
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [cameraError, setCameraError] = useState<string | null>(null)
-  const [isCameraReady, setIsCameraReady] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
   const [poseDetected, setPoseDetected] = useState(false)
 
   useEffect(() => {
-    let isMounted = true
+    let mounted = true
 
-    const start = async () => {
+    const init = async () => {
       try {
-        setIsLoading(true)
-        setCameraError(null)
-        setPoseDetected(false)
+        setLoading(true)
+        setError(null)
 
-        // 🔹 Load Mediapipe
+        // 🚨 HTTPS CHECK
+        if (
+          location.protocol !== 'https:' &&
+          location.hostname !== 'localhost'
+        ) {
+          throw new Error('Camera requires HTTPS or localhost')
+        }
+
+        // Load AI
         const vision = await FilesetResolver.forVisionTasks(
           'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
         )
@@ -61,9 +65,9 @@ export default function TryOnEngine({
           numPoses: 1,
         })
 
-        poseLandmarkerRef.current = pose
+        poseRef.current = pose
 
-        // 🔹 Load garment image
+        // Load PNG
         const img = new Image()
         img.crossOrigin = 'anonymous'
         img.src = itemUrl
@@ -73,11 +77,11 @@ export default function TryOnEngine({
           img.onerror = () => rej('Image failed to load')
         })
 
-        garmentImageRef.current = img
+        imageRef.current = img
 
-        // 🔹 Camera
+        // Camera
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user' },
+          video: true,
         })
 
         streamRef.current = stream
@@ -86,31 +90,26 @@ export default function TryOnEngine({
 
         videoRef.current.srcObject = stream
 
-        // ⚡ FIX play() error
         await videoRef.current.play().catch(() => {})
 
-        if (!isMounted) return
+        if (!mounted) return
 
-        setIsCameraReady(true)
-        setIsLoading(false)
-
+        setLoading(false)
         loop()
-      } catch (err: any) {
-        setCameraError(
-          err?.message || 'Camera error. Allow permission or use HTTPS.'
-        )
-        setIsLoading(false)
+      } catch (e: any) {
+        setError(e.message)
+        setLoading(false)
       }
     }
 
     const loop = () => {
       const video = videoRef.current
       const canvas = canvasRef.current
-      const pose = poseLandmarkerRef.current
-      const img = garmentImageRef.current
+      const pose = poseRef.current
+      const img = imageRef.current
 
       if (!video || !canvas || !pose || !img) {
-        animationFrameRef.current = requestAnimationFrame(loop)
+        requestAnimationFrame(loop)
         return
       }
 
@@ -121,7 +120,7 @@ export default function TryOnEngine({
       const h = video.videoHeight
 
       if (!w || !h) {
-        animationFrameRef.current = requestAnimationFrame(loop)
+        requestAnimationFrame(loop)
         return
       }
 
@@ -130,105 +129,67 @@ export default function TryOnEngine({
 
       ctx.clearRect(0, 0, w, h)
 
-      // mirror
       ctx.save()
       ctx.translate(w, 0)
       ctx.scale(-1, 1)
-
       ctx.drawImage(video, 0, 0, w, h)
 
-      const results = pose.detectForVideo(video, performance.now())
+      const res = pose.detectForVideo(video, performance.now())
 
-      if (results.landmarks?.length) {
-        const lm = results.landmarks[0]
+      if (res.landmarks?.length) {
+        const lm = res.landmarks[0]
 
-        const leftShoulder = lm[11]
-        const rightShoulder = lm[12]
-        const leftHip = lm[23]
-        const rightHip = lm[24]
+        const ls = lm[11]
+        const rs = lm[12]
+        const lh = lm[23]
+        const rh = lm[24]
 
-        if (leftShoulder && rightShoulder && leftHip && rightHip) {
+        if (ls && rs && lh && rh) {
           setPoseDetected(true)
 
-          const lsx = leftShoulder.x * w
-          const lsy = leftShoulder.y * h
-          const rsx = rightShoulder.x * w
-          const rsy = rightShoulder.y * h
-
-          const hipY =
-            ((leftHip.y * h + rightHip.y * h) / 2)
-
-          const shoulderWidth = Math.abs(rsx - lsx)
-          const torsoHeight = Math.abs(hipY - (lsy + rsy) / 2)
-
-          const angle = Math.atan2(rsy - lsy, rsx - lsx)
           const scale = SIZE_SCALE[selectedSize] || 1
 
-          const gw = shoulderWidth * 2.1 * scale
-          const gh = torsoHeight * 2.4 * scale
+          const sw = Math.abs(rs.x - ls.x) * w
+          const sh = ((lh.y + rh.y) / 2 - (ls.y + rs.y) / 2) * h
 
-          ctx.save()
-          ctx.translate((lsx + rsx) / 2, (lsy + rsy) / 2 + torsoHeight * 0.2)
-          ctx.rotate(-angle)
+          const cx = ((ls.x + rs.x) / 2) * w
+          const cy = ((ls.y + rs.y) / 2) * h
 
-          ctx.drawImage(img, -gw / 2, -gh / 3, gw, gh)
+          const gw = sw * 2 * scale
+          const gh = sh * 2.3 * scale
 
-          ctx.restore()
+          ctx.drawImage(img, cx - gw / 2, cy - gh / 3, gw, gh)
         } else {
           setPoseDetected(false)
         }
       }
 
       ctx.restore()
-
-      animationFrameRef.current = requestAnimationFrame(loop)
+      requestAnimationFrame(loop)
     }
 
-    start()
+    init()
 
     return () => {
-      isMounted = false
-
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-      }
-
-      if (poseLandmarkerRef.current) {
-        poseLandmarkerRef.current.close()
-      }
-
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop())
-      }
+      mounted = false
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+      poseRef.current?.close()
     }
   }, [itemUrl, selectedSize])
 
   return (
-    <div className="w-full mt-6">
-      <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6">
-        <div className="flex justify-between mb-4">
-          <p className="text-xs text-zinc-400">Live AI Fitting</p>
-          <span className="text-cyan-400 font-bold">{selectedSize}</span>
-        </div>
+    <div className="mt-6">
+      {loading && <p className="text-cyan-400 text-xs">Starting camera...</p>}
+      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {!poseDetected && !loading && !error && (
+        <p className="text-yellow-400 text-xs">
+          Show shoulders clearly
+        </p>
+      )}
 
-        {isLoading && (
-          <p className="text-cyan-400 text-xs mb-3">Starting camera...</p>
-        )}
-
-        {cameraError && (
-          <p className="text-red-400 text-xs mb-3">{cameraError}</p>
-        )}
-
-        {!poseDetected && isCameraReady && (
-          <p className="text-yellow-400 text-xs mb-3">
-            Show shoulders clearly
-          </p>
-        )}
-
-        <div className="relative w-full aspect-[3/4] bg-black rounded-xl overflow-hidden">
-          <video ref={videoRef} autoPlay muted playsInline className="hidden" />
-          <canvas ref={canvasRef} className="w-full h-full" />
-        </div>
+      <div className="w-full aspect-[3/4] bg-black rounded-xl overflow-hidden">
+        <video ref={videoRef} className="hidden" autoPlay playsInline />
+        <canvas ref={canvasRef} className="w-full h-full" />
       </div>
     </div>
   )
