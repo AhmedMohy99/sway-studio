@@ -1,209 +1,95 @@
-type ProductVariant = {
-  colorName: string
-  url: string
-  tryOnImage?: string
-}
-
-type Product = {
-  name: string
-  price: string
-  oldPrice?: string
-  sku?: string
-  image: string
-  tryOnImage?: string
-  variants?: ProductVariant[]
-}
-
-type Collection = {
-  id: string
-  name: string
-  products: Product[]
-}
-
-export const COLLECTIONS: Collection[] = [
+export const COLLECTIONS = [
   {
-    id: 'aero-collection',
-    name: 'AERO COLLECTION',
+    id: 'try-test',
+    name: 'TRY & TEST',
     products: [
+      // ===== T-SHIRTS =====
       {
-        name: 'ETERNITY PROTOCOL',
-        sku: 'ARO-OTOW-EP16',
+        name: 'The Powder Blue Venture Tee',
+        price: '440',
+        image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e6b889925deproductimage69e6b51508e46.jpg',
+        tryOnImage: '/tryon/powder-blue-tee.png',
+      },
+      {
+        name: 'The Catalyst Tee',
         price: '730',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg',
-        tryOnImage: '/tryon/eternity-protocol-white-base.png',
-        variants: [
-          {
-            colorName: 'White Base',
-            url:
-              'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69e1482147a27productimage69e14759939d1.jpg',
-            tryOnImage: '/tryon/eternity-protocol-white-base.png',
-          },
-          {
-            colorName: 'Navy Blue',
-            url:
-              'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg',
-            tryOnImage: '/tryon/eternity-protocol-navy-blue.png',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'urban-fossils',
-    name: 'URBAN FOSSILS',
-    products: [
-      {
-        name: 'Charcoal Black Rogue Relic Hoodie',
-        price: '1500',
-        oldPrice: '1900',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699c551d958e6productimage699c03358e5fa.jpg',
-        tryOnImage: '/tryon/charcoal-black-rogue-relic-hoodie.png',
+        image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e6b1f0dd14cproductimage69e6b1aa693e8.jpg',
+        tryOnImage: '/tryon/catalyst-tee.png',
       },
       {
-        name: 'Ice Blue Rogue Relic Hoodie',
-        price: '1500',
-        oldPrice: '1900',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699c55ab75572productimage699c03358e5fc.jpg',
-        tryOnImage: '/tryon/ice-blue-rogue-relic-hoodie.png',
+        name: 'Bluish Splash',
+        price: '730',
+        image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e6af828f618productimage69e6af182e668.jpg',
+        tryOnImage: '/tryon/bluish-splash.png',
       },
       {
-        name: 'Dust Rose Rogue Relic Hoodie',
-        price: '1500',
-        oldPrice: '1900',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699c5654e26ecproductimage699c03358e5fe.jpg',
-        tryOnImage: '/tryon/dust-rose-rogue-relic-hoodie.png',
-      },
-    ],
-  },
-  {
-    id: 'colours-explosion',
-    name: 'COLOURS EXPLOSION',
-    products: [
-      {
-        name: 'Maverick Phoenix Set - WHITE',
-        price: '2400',
-        oldPrice: '2800',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69aa674aae5f0productimage69a4f7b8adae6.jpg',
-        tryOnImage: '/tryon/maverick-phoenix-set-white.png',
+        name: 'Yellowish Splash',
+        price: '730',
+        image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e6ad3d902f4productimage69e6ac753e18a.jpg',
+        tryOnImage: '/tryon/yellowish-splash.png',
       },
       {
-        name: 'Maverick Phoenix Hoodie',
-        price: '1400',
-        oldPrice: '1800',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69ac482151071productimage69a5d9cc657ab.jpg',
-        tryOnImage: '/tryon/maverick-phoenix-hoodie.png',
+        name: 'Greenish Splash',
+        price: '730',
+        image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e6aa596ae5cproductimage69e6a931d9611.jpg',
+        tryOnImage: '/tryon/greenish-splash.png',
       },
       {
-        name: 'Maverick Phoenix Set - BLACK',
-        price: '2400',
-        oldPrice: '2800',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69a4eb6cc4c0dproductimage69a4eb2b29665.jpg',
-        tryOnImage: '/tryon/maverick-phoenix-set-black.png',
+        name: 'The Maverick Phoenix',
+        price: '730',
+        image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e69abfcec21productimage69e69a06054c4.jpg',
+        tryOnImage: '/tryon/maverick-phoenix.png',
       },
       {
-        name: 'Spectrum Explosion Hoodie',
-        price: '1400',
-        oldPrice: '1800',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69aa6a7926906productimage699c03358e5f8.jpg',
-        tryOnImage: '/tryon/spectrum-explosion-hoodie.png',
+        name: 'Cyber Crescent',
+        price: '730',
+        image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e6a659a24b7productimage69e6a59ddf53b.jpg',
+        tryOnImage: '/tryon/cyber-crescent.png',
       },
-    ],
-  },
-  {
-    id: 'light-gear',
-    name: 'LIGHT GEAR',
-    products: [
-      {
-        name: 'Black Flux Zip Hoodie',
-        price: '1300',
-        oldPrice: '1700',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699c56c3913bcproductimage699c03358e600.jpg',
-        tryOnImage: '/tryon/black-flux-zip-hoodie.png',
-      },
+
+      // ===== SWEATPANTS =====
       {
         name: 'Black Flux Sweatpants',
-        price: '900',
+        price: '660',
         oldPrice: '1400',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699d9bbbb2f5aproductimage699c03358e601.jpg',
-        tryOnImage: '/tryon/black-flux-sweatpants.png',
-      },
-      {
-        name: 'Maverick Code Zip Hoodie',
-        price: '1400',
-        oldPrice: '1800',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699c57e9557ffproductimage699c03358e603.jpg',
-        tryOnImage: '/tryon/maverick-code-zip-hoodie.png',
+        image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e75f1c28fccproductimage699c03358e601.jpg',
+        tryOnImage: '/tryon/black-flux-pants.png',
       },
       {
         name: 'Light Code Sweatpants',
-        price: '900',
+        price: '660',
         oldPrice: '1300',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699d9be7c3129productimage699c03358e605.jpg',
-        tryOnImage: '/tryon/light-code-sweatpants.png',
+        image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/699d9be7c3129productimage699c03358e605.jpg',
+        tryOnImage: '/tryon/light-code-pants.png',
       },
     ],
   },
+
+  // ===== PREORDER SECTION =====
   {
-    id: 'manifesto',
-    name: 'MANIFESTO',
+    id: 'preorder',
+    name: 'PRE ORDER',
     products: [
       {
-        name: 'The Sovereign Hoodie',
-        price: '1500',
-        oldPrice: '1900',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69b54062cb422productimage6995933b34e69.png',
-        tryOnImage: '/tryon/the-sovereign-hoodie.png',
-      },
-      {
-        name: 'The Anthem Hoodie',
-        price: '1500',
-        oldPrice: '1900',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69b19e7dbdea7productimage699c03358e5ed.jpg',
-        tryOnImage: '/tryon/the-anthem-hoodie.png',
-      },
-      {
-        name: 'The Decree Hoodie',
-        price: '1500',
-        oldPrice: '1900',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69b0cd8ca5e1cproductimage699c03358e5f2.jpg',
-        tryOnImage: '/tryon/the-decree-hoodie.png',
-      },
-      {
-        name: 'High Tide Hoodie',
-        price: '1400',
-        oldPrice: '1800',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/69b0cb334f851productimage699c03358e5f5.jpg',
-        tryOnImage: '/tryon/high-tide-hoodie.png',
-      },
-      {
-        name: 'Blue Authority Hoodie',
-        price: '1400',
-        oldPrice: '1800',
-        image:
-          'https://ik.imagekit.io/uiumblazm/tr:w-1000,h-1500/products/696e0bcb55259/699c508680247productimage699c03358e5f7.jpg',
-        tryOnImage: '/tryon/blue-authority-hoodie.png',
+        name: 'Eternity Protocol',
+        price: '730',
+        image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e14821423d8productimage69e14759939d1.jpg',
+        variants: [
+          {
+            colorName: 'White',
+            url: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e14821423d8productimage69e14759939d1.jpg',
+          },
+          {
+            colorName: 'Navy Blue',
+            url: 'https://ik.imagekit.io/5yvgym2qm/tr:w-null,h-null//products/696e0bcb55259/69e1482150dd4productimage69e14759939d1.jpg',
+          },
+        ],
       },
     ],
   },
 ]
 
 export const CONTACT_LINKS = {
-  whatsapp: 'https://api.whatsapp.com/send?phone=201033866838',
-  instagram: 'https://www.instagram.com/swaymaverick',
+  whatsapp: "https://api.whatsapp.com/send?phone=201033866838",
+  instagram: "https://www.instagram.com/swaymaverick"
 }
