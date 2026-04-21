@@ -44,6 +44,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-black text-white selection:bg-cyan-400">
+      {/* NAVBAR */}
       <nav className="fixed top-0 w-full z-50 bg-black/95 backdrop-blur-xl border-b border-white/5 p-8 flex justify-between items-center px-12">
         <div className="flex flex-col">
           <h1 className="text-2xl font-[1000] italic tracking-tighter text-cyan-400 leading-none uppercase">
@@ -78,10 +79,11 @@ export default function Home() {
           rel="noreferrer"
           className="text-[10px] uppercase font-black tracking-widest bg-cyan-400 text-black px-6 py-2 rounded-full shadow-lg shadow-cyan-400/20"
         >
-          Preorder
+          WhatsApp
         </a>
       </nav>
 
+      {/* TABS */}
       <div className="pt-28 px-6 flex justify-center gap-3 overflow-x-auto no-scrollbar pb-8 sticky top-0 bg-black z-40 border-b border-white/5">
         {COLLECTIONS.map((col) => (
           <button
@@ -98,6 +100,7 @@ export default function Home() {
         ))}
       </div>
 
+      {/* HEADER */}
       <header className="py-12 text-center">
         <h2 className="text-4xl md:text-6xl font-[1000] tracking-tighter uppercase italic text-white mb-2 leading-tight">
           {currentCollection?.name}
@@ -105,6 +108,7 @@ export default function Home() {
         <div className="h-1.5 w-24 bg-cyan-400 mx-auto rounded-full" />
       </header>
 
+      {/* PRODUCTS */}
       <section className="px-6 md:px-16 pb-32 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
         {currentCollection?.products.map((prod: any, idx: number) => (
           <div key={idx} className="flex flex-col items-center group">
@@ -117,6 +121,21 @@ export default function Home() {
 
               <button
                 onClick={() => {
+                  // ✅ PREORDER FLOW
+                  if (activeTab === 'preorder') {
+                    const message = `PREORDER REQUEST:
+Product: ${prod.name}
+Size: ${selectedSize}
+
+I checked the size guide and I want to preorder this piece.`
+
+                    window.open(
+                      `${CONTACT_LINKS.whatsapp}&text=${encodeURIComponent(message)}`
+                    )
+                    return
+                  }
+
+                  // ✅ TRY-ON FLOW
                   setSelectedProduct(prod)
                   setActiveImage(getTryOnImage(prod))
                   setSelectedSize('L')
@@ -124,7 +143,7 @@ export default function Home() {
                 }}
                 className="absolute bottom-8 left-8 right-8 bg-white text-black py-5 rounded-full text-[10px] font-[1000] uppercase tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all shadow-2xl"
               >
-                Launch AI Studio
+                {activeTab === 'preorder' ? 'Preorder via WhatsApp' : 'Launch AI Studio'}
               </button>
             </div>
 
@@ -146,6 +165,7 @@ export default function Home() {
         ))}
       </section>
 
+      {/* TRY ON MODAL */}
       {isTryOnOpen && (
         <div className="fixed inset-0 z-[100] bg-black/98 backdrop-blur-3xl flex flex-col items-center justify-center p-6 overflow-y-auto">
           <button
@@ -156,90 +176,19 @@ export default function Home() {
           </button>
 
           <div className="w-full max-w-lg mt-20 text-left">
-            <h2 className="text-white text-4xl font-[1000] italic uppercase mb-2 leading-none text-center">
+            <h2 className="text-white text-4xl font-[1000] italic uppercase mb-2 text-center">
               {selectedProduct.name}
             </h2>
+
             <p className="text-cyan-400 font-black mb-8 italic text-lg text-center">
               EGP {selectedProduct.price}.00
             </p>
-
-            {selectedProduct.variants && (
-              <div className="flex justify-center gap-3 mb-8 flex-wrap">
-                {selectedProduct.variants.map((v: any) => {
-                  const variantTryOnImage = getTryOnImage(v)
-
-                  return (
-                    <button
-                      key={v.colorName}
-                      onClick={() => setActiveImage(variantTryOnImage)}
-                      className={`px-6 py-3 rounded-xl border-2 text-[10px] font-black uppercase tracking-widest transition-all ${
-                        activeImage === variantTryOnImage
-                          ? 'border-cyan-400 text-cyan-400 bg-cyan-400/10'
-                          : 'border-white/10 text-zinc-600'
-                      }`}
-                    >
-                      {v.colorName}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-
-            <div className="mb-6 bg-zinc-950 p-6 rounded-[30px] border border-white/5">
-              <div className="flex justify-between items-center mb-4">
-                <p className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.3em]">
-                  1. Select Target Size
-                </p>
-                <button
-                  onClick={() => setIsSizeGuideOpen(true)}
-                  className="text-[9px] font-black text-cyan-400 hover:text-white transition uppercase tracking-widest"
-                >
-                  View Guide
-                </button>
-              </div>
-
-              <div className="flex justify-center gap-3 flex-wrap">
-                {(['S', 'M', 'L', 'XL', '2XL'] as const).map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSelectedSize(s)}
-                    className={`w-12 h-12 border-2 rounded-xl font-[1000] text-sm transition-all ${
-                      selectedSize === s
-                        ? 'border-magenta-500 text-magenta-500 shadow-[0_0_15px_rgba(255,0,255,0.2)] bg-magenta-500/10'
-                        : 'border-white/10 text-zinc-600 hover:border-white/30'
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <TryOnEngine
               itemUrl={activeImage}
               selectedSize={selectedSize}
               productName={selectedProduct.name}
             />
-
-            {!activeImage && (
-              <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-center">
-                <p className="text-[10px] uppercase font-black tracking-wide text-red-400">
-                  No try-on image found for this product
-                </p>
-                <p className="text-[10px] text-zinc-500 mt-2">
-                  Add a transparent PNG in products.ts using tryOnImage.
-                </p>
-              </div>
-            )}
-
-            <a
-              href={`${CONTACT_LINKS.whatsapp}&text=PREORDER: ${selectedProduct.name} | SIZE: ${selectedSize}`}
-              className="mt-6 block w-full bg-white text-black py-6 rounded-full text-center text-xs font-[1000] uppercase tracking-[0.4em] shadow-2xl hover:scale-[0.98] transition-transform"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Confirm Preorder
-            </a>
           </div>
         </div>
       )}
