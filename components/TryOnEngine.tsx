@@ -31,32 +31,28 @@ export default function TryOnEngine({
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null)
   const garmentImageRef = useRef<HTMLImageElement | null>(null)
   const animationFrameRef = useRef<number | null>(null)
-  const lastVideoTimeRef = useRef(-1)
+  const streamRef = useRef<MediaStream | null>(null)
 
   const [isLoading, setIsLoading] = useState(true)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [isCameraReady, setIsCameraReady] = useState(false)
   const [poseDetected, setPoseDetected] = useState(false)
-  const [imageLoaded, setImageLoaded] = useState(false)
 
   useEffect(() => {
-    let mounted = true
-    let mediaStream: MediaStream | null = null
+    let isMounted = true
 
-    const loadEngine = async () => {
+    const start = async () => {
       try {
         setIsLoading(true)
         setCameraError(null)
         setPoseDetected(false)
-        setImageLoaded(false)
 
-        console.log('TryOnEngine itemUrl:', itemUrl)
-
+        // 🔹 Load Mediapipe
         const vision = await FilesetResolver.forVisionTasks(
           'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
         )
 
-        const poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+        const pose = await PoseLandmarker.createFromOptions(vision, {
           baseOptions: {
             modelAssetPath:
               'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task',
@@ -65,168 +61,133 @@ export default function TryOnEngine({
           numPoses: 1,
         })
 
-        poseLandmarkerRef.current = poseLandmarker
+        poseLandmarkerRef.current = pose
 
-        const garmentImage = new Image()
-        garmentImage.crossOrigin = 'anonymous'
-        garmentImage.src = itemUrl
+        // 🔹 Load garment image
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.src = itemUrl
 
-        await new Promise<void>((resolve, reject) => {
-          garmentImage.onload = () => {
-            console.log('Garment image loaded:', itemUrl)
-            setImageLoaded(true)
-            resolve()
-          }
-          garmentImage.onerror = () =>
-            reject(
-              new Error(
-                'Garment image failed to load. Use a valid transparent PNG path.'
-              )
-            )
+        await new Promise((res, rej) => {
+          img.onload = res
+          img.onerror = () => rej('Image failed to load')
         })
 
-        garmentImageRef.current = garmentImage
+        garmentImageRef.current = img
 
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'user',
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: false,
+        // 🔹 Camera
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user' },
         })
+
+        streamRef.current = stream
 
         if (!videoRef.current) return
 
-        videoRef.current.srcObject = mediaStream
-        await videoRef.current.play()
+        videoRef.current.srcObject = stream
 
-        if (!mounted) return
+        // ⚡ FIX play() error
+        await videoRef.current.play().catch(() => {})
+
+        if (!isMounted) return
 
         setIsCameraReady(true)
         setIsLoading(false)
-        renderFrame()
-      } catch (error: any) {
-        console.error(error)
+
+        loop()
+      } catch (err: any) {
         setCameraError(
-          error?.message ||
-            'Could not start the live fitting engine. Please allow camera access.'
+          err?.message || 'Camera error. Allow permission or use HTTPS.'
         )
         setIsLoading(false)
       }
     }
 
-    const renderFrame = () => {
+    const loop = () => {
       const video = videoRef.current
       const canvas = canvasRef.current
-      const poseLandmarker = poseLandmarkerRef.current
-      const garmentImage = garmentImageRef.current
+      const pose = poseLandmarkerRef.current
+      const img = garmentImageRef.current
 
-      if (!video || !canvas || !poseLandmarker || !garmentImage) {
-        animationFrameRef.current = requestAnimationFrame(renderFrame)
+      if (!video || !canvas || !pose || !img) {
+        animationFrameRef.current = requestAnimationFrame(loop)
         return
       }
 
       const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        animationFrameRef.current = requestAnimationFrame(renderFrame)
+      if (!ctx) return
+
+      const w = video.videoWidth
+      const h = video.videoHeight
+
+      if (!w || !h) {
+        animationFrameRef.current = requestAnimationFrame(loop)
         return
       }
 
-      const width = video.videoWidth
-      const height = video.videoHeight
+      canvas.width = w
+      canvas.height = h
 
-      if (!width || !height) {
-        animationFrameRef.current = requestAnimationFrame(renderFrame)
-        return
-      }
+      ctx.clearRect(0, 0, w, h)
 
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width
-        canvas.height = height
-      }
-
-      ctx.clearRect(0, 0, width, height)
-
+      // mirror
       ctx.save()
-      ctx.translate(width, 0)
+      ctx.translate(w, 0)
       ctx.scale(-1, 1)
-      ctx.drawImage(video, 0, 0, width, height)
 
-      let shouldersFound = false
+      ctx.drawImage(video, 0, 0, w, h)
 
-      if (video.currentTime !== lastVideoTimeRef.current) {
-        lastVideoTimeRef.current = video.currentTime
+      const results = pose.detectForVideo(video, performance.now())
 
-        const results = poseLandmarker.detectForVideo(video, performance.now())
+      if (results.landmarks?.length) {
+        const lm = results.landmarks[0]
 
-        if (results.landmarks && results.landmarks.length > 0) {
-          const lm = results.landmarks[0]
-          const drawingUtils = new DrawingUtils(ctx)
+        const leftShoulder = lm[11]
+        const rightShoulder = lm[12]
+        const leftHip = lm[23]
+        const rightHip = lm[24]
 
-          drawingUtils.drawLandmarks(lm, { radius: 3 })
+        if (leftShoulder && rightShoulder && leftHip && rightHip) {
+          setPoseDetected(true)
 
-          const leftShoulder = lm[11]
-          const rightShoulder = lm[12]
-          const leftHip = lm[23]
-          const rightHip = lm[24]
+          const lsx = leftShoulder.x * w
+          const lsy = leftShoulder.y * h
+          const rsx = rightShoulder.x * w
+          const rsy = rightShoulder.y * h
 
-          if (leftShoulder && rightShoulder && leftHip && rightHip) {
-            shouldersFound = true
-            setPoseDetected(true)
+          const hipY =
+            ((leftHip.y * h + rightHip.y * h) / 2)
 
-            const lsx = leftShoulder.x * width
-            const lsy = leftShoulder.y * height
-            const rsx = rightShoulder.x * width
-            const rsy = rightShoulder.y * height
-            const lhy = leftHip.y * height
-            const rhy = rightHip.y * height
+          const shoulderWidth = Math.abs(rsx - lsx)
+          const torsoHeight = Math.abs(hipY - (lsy + rsy) / 2)
 
-            const shoulderCenterX = (lsx + rsx) / 2
-            const shoulderCenterY = (lsy + rsy) / 2
-            const hipCenterY = (lhy + rhy) / 2
+          const angle = Math.atan2(rsy - lsy, rsx - lsx)
+          const scale = SIZE_SCALE[selectedSize] || 1
 
-            const shoulderWidth = Math.abs(rsx - lsx)
-            const torsoHeight = Math.abs(hipCenterY - shoulderCenterY)
-            const bodyAngle = Math.atan2(rsy - lsy, rsx - lsx)
+          const gw = shoulderWidth * 2.1 * scale
+          const gh = torsoHeight * 2.4 * scale
 
-            const scale = SIZE_SCALE[selectedSize] || 1
+          ctx.save()
+          ctx.translate((lsx + rsx) / 2, (lsy + rsy) / 2 + torsoHeight * 0.2)
+          ctx.rotate(-angle)
 
-            const garmentWidth = shoulderWidth * 2.05 * scale
-            const garmentHeight = torsoHeight * 2.45 * scale
+          ctx.drawImage(img, -gw / 2, -gh / 3, gw, gh)
 
-            ctx.save()
-            ctx.translate(
-              shoulderCenterX,
-              shoulderCenterY + torsoHeight * 0.22
-            )
-            ctx.rotate(-bodyAngle)
-
-            ctx.drawImage(
-              garmentImage,
-              -garmentWidth / 2,
-              -garmentHeight / 3,
-              garmentWidth,
-              garmentHeight
-            )
-
-            ctx.restore()
-          }
+          ctx.restore()
+        } else {
+          setPoseDetected(false)
         }
       }
 
-      if (!shouldersFound && isCameraReady) {
-        setPoseDetected(false)
-      }
-
       ctx.restore()
-      animationFrameRef.current = requestAnimationFrame(renderFrame)
+
+      animationFrameRef.current = requestAnimationFrame(loop)
     }
 
-    loadEngine()
+    start()
 
     return () => {
-      mounted = false
+      isMounted = false
 
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
@@ -236,13 +197,8 @@ export default function TryOnEngine({
         poseLandmarkerRef.current.close()
       }
 
-      if (videoRef.current?.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream
-        stream.getTracks().forEach((track) => track.stop())
-      }
-
-      if (mediaStream) {
-        mediaStream.getTracks().forEach((track) => track.stop())
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop())
       }
     }
   }, [itemUrl, selectedSize])
@@ -250,95 +206,28 @@ export default function TryOnEngine({
   return (
     <div className="w-full mt-6">
       <div className="bg-zinc-950 rounded-[30px] border border-white/10 p-6">
-        <div className="flex items-center justify-between gap-4 mb-5">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
-              Live AI Fitting
-            </p>
-            <h3 className="text-sm md:text-base font-[1000] uppercase text-white tracking-tight">
-              {productName}
-            </h3>
-          </div>
-
-          <div className="w-12 h-12 rounded-xl border-2 border-cyan-400 bg-cyan-400/10 text-cyan-400 flex items-center justify-center font-[1000] text-sm shadow-[0_0_20px_rgba(34,211,238,0.15)]">
-            {selectedSize}
-          </div>
+        <div className="flex justify-between mb-4">
+          <p className="text-xs text-zinc-400">Live AI Fitting</p>
+          <span className="text-cyan-400 font-bold">{selectedSize}</span>
         </div>
 
         {isLoading && (
-          <div className="mb-4 rounded-2xl border border-cyan-400/20 bg-cyan-400/5 px-4 py-3 text-center">
-            <p className="text-[10px] uppercase font-black tracking-widest text-cyan-400 animate-pulse">
-              Starting camera and fitting engine...
-            </p>
-          </div>
+          <p className="text-cyan-400 text-xs mb-3">Starting camera...</p>
         )}
 
         {cameraError && (
-          <div className="mb-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-center">
-            <p className="text-[10px] uppercase font-black tracking-wide text-red-400">
-              {cameraError}
-            </p>
-            <p className="text-[10px] text-zinc-500 mt-2">
-              Make sure camera permission is allowed and the site runs on
-              localhost or HTTPS.
-            </p>
-          </div>
+          <p className="text-red-400 text-xs mb-3">{cameraError}</p>
         )}
 
-        {!cameraError && isCameraReady && !poseDetected && (
-          <div className="mb-4 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-center">
-            <p className="text-[10px] uppercase font-black tracking-wide text-yellow-300">
-              Body not detected yet
-            </p>
-            <p className="text-[10px] text-zinc-500 mt-2">
-              Step back a little, show shoulders clearly, and use brighter light.
-            </p>
-          </div>
-        )}
-
-        {!cameraError && isCameraReady && !imageLoaded && (
-          <div className="mb-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-center">
-            <p className="text-[10px] uppercase font-black tracking-wide text-red-400">
-              Product image not loaded
-            </p>
-          </div>
-        )}
-
-        <div className="relative w-full aspect-[3/4] bg-black rounded-[24px] overflow-hidden border border-zinc-800">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="hidden"
-          />
-          <canvas
-            ref={canvasRef}
-            className="w-full h-full object-cover"
-          />
-
-          {!isCameraReady && !cameraError && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center px-6">
-                <div className="w-14 h-14 border-t-4 border-cyan-400 rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
-                  Preparing studio
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/5 bg-black/40 p-4">
-          <p className="text-[10px] uppercase font-black tracking-[0.25em] text-zinc-500 mb-2">
-            Best Result Tips
+        {!poseDetected && isCameraReady && (
+          <p className="text-yellow-400 text-xs mb-3">
+            Show shoulders clearly
           </p>
-          <ul className="text-[11px] text-zinc-400 space-y-1 leading-relaxed">
-            <li>• Stand centered in front of the camera</li>
-            <li>• Keep shoulders and upper body visible</li>
-            <li>• Use a transparent PNG product image</li>
-            <li>• Good lighting improves the fit alignment</li>
-          </ul>
+        )}
+
+        <div className="relative w-full aspect-[3/4] bg-black rounded-xl overflow-hidden">
+          <video ref={videoRef} autoPlay muted playsInline className="hidden" />
+          <canvas ref={canvasRef} className="w-full h-full" />
         </div>
       </div>
     </div>
