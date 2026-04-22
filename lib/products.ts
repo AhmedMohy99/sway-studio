@@ -1,7 +1,8 @@
-// 1. Define the Type
+// lib/products.ts
+
 export type SizeOption = 'S' | 'M' | 'L' | 'XL' | '2XL'
 
-// 2. Export the actual ARRAY for the UI (Crucial for page.tsx)
+// This is the actual array the page needs to loop through for the buttons
 export const SIZES: SizeOption[] = ['S', 'M', 'L', 'XL', '2XL']
 
 export type ProductVariant = {
@@ -19,7 +20,11 @@ export type Product = {
   variants?: ProductVariant[]
 }
 
-// 3. Export the Products List
+export const CONTACT_LINKS = {
+  whatsapp: 'https://api.whatsapp.com/send?phone=201033866838',
+  instagram: 'https://www.instagram.com/swaymaverick',
+}
+
 export const TRY_TEST_PRODUCTS: Product[] = [
   {
     name: 'The Powder Blue Venture Tee',
@@ -79,7 +84,6 @@ export const TRY_TEST_PRODUCTS: Product[] = [
   },
 ]
 
-// 4. Export Preorder
 export const PREORDER_PRODUCT: Product = {
   name: 'Eternity Protocol',
   price: '730',
@@ -94,10 +98,4 @@ export const PREORDER_PRODUCT: Product = {
       url: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e1482150dd4productimage69e14759939d1.jpg',
     },
   ],
-}
-
-// 5. Export Contact Links
-export const CONTACT_LINKS = {
-  whatsapp: 'https://api.whatsapp.com/send?phone=201033866838',
-  instagram: 'https://www.instagram.com/swaymaverick',
 }
