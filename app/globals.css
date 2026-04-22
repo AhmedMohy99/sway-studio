@@ -1,4 +1,7 @@
-/* Custom Utility for Mobile */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
@@ -9,8 +12,9 @@
   }
 }
 
-/* Ensure the background is pitch black */
 html, body {
   background-color: #000000 !important;
-  overscroll-behavior-y: contain; /* Prevents pull-to-refresh inside modal */
+  color: white;
+  margin: 0;
+  padding: 0;
 }
