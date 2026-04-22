@@ -1,7 +1,5 @@
 // lib/products.ts
-
 export type SizeOption = 'S' | 'M' | 'L' | 'XL' | '2XL'
-
 export const SIZES: SizeOption[] = ['S', 'M', 'L', 'XL', '2XL']
 
 export type Product = {
@@ -65,14 +63,6 @@ export const TRY_TEST_PRODUCTS: Product[] = [
     type: 'pants',
     image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e75f1c28fccproductimage699c03358e601.jpg',
     tryOnImage: '/black-flux-sweatpants.png',
-  },
-  {
-    name: 'Light Code Sweatpants',
-    price: '660.00',
-    oldPrice: '1300.00',
-    type: 'pants',
-    image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/699d9be7c3129productimage699c03358e605.jpg',
-    tryOnImage: '/light-code-sweatpants.png',
   },
 ]
 
