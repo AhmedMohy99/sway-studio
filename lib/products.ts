@@ -2,6 +2,9 @@
 
 export type SizeOption = 'S' | 'M' | 'L' | 'XL' | '2XL'
 
+// This was missing and caused the Red X error:
+export const SIZES: SizeOption[] = ['S', 'M', 'L', 'XL', '2XL']
+
 export type Product = {
   name: string
   price: string
