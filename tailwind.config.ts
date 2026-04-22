@@ -1,19 +1,20 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       colors: {
-        background: '#000000',
-        swayCyan: '#00F5FF', // The glow color from your logo
-        swayDark: '#0A0A0A',
+        cyan: {
+          400: '#22d3ee',
+        }
       },
     },
   },
   plugins: [],
-}
-export default config
+};
+export default config;
