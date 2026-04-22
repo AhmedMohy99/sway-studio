@@ -2,16 +2,17 @@
 
 export type SizeOption = 'S' | 'M' | 'L' | 'XL' | '2XL'
 
-// This was missing and caused the Red X error:
+// Essential for the build fix!
 export const SIZES: SizeOption[] = ['S', 'M', 'L', 'XL', '2XL']
 
 export type Product = {
   name: string
   price: string
+  oldPrice?: string
   image: string
-  type: 'regular' | 'oversized'
+  type: 'regular' | 'oversized' | 'pants'
   tryOnImage?: string
-  variants?: { colorName: string; tryOnImage: string }[]
+  variants?: { colorName: string; tryOnImage: string; url: string }[]
 }
 
 export const CONTACT_LINKS = {
@@ -19,6 +20,24 @@ export const CONTACT_LINKS = {
 }
 
 export const TRY_TEST_PRODUCTS: Product[] = [
+  {
+    name: 'The Maverick Phoenix',
+    price: '730.00',
+    type: 'oversized',
+    image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e69abfcec21productimage69e69a06054c4.jpg',
+    variants: [
+      { 
+        colorName: 'Dark Black', 
+        tryOnImage: '/maverick-phoenix-black.png',
+        url: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e69abfcec21productimage69e69a06054c4.jpg'
+      },
+      { 
+        colorName: 'White Base', 
+        tryOnImage: '/maverick-phoenix-white.png',
+        url: 'https://ik.imagekit.io/5yvgym2qm/tr:w-null,h-null//products/696e0bcb55259/69e69a855a864productimage69e69a06054c4.jpg'
+      },
+    ],
+  },
   {
     name: 'The Powder Blue Venture Tee',
     price: '440.00',
@@ -41,13 +60,6 @@ export const TRY_TEST_PRODUCTS: Product[] = [
     tryOnImage: '/bluish-splash.png',
   },
   {
-    name: 'Greenish Splash',
-    price: '730.00',
-    type: 'oversized',
-    image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e6aa596ae5cproductimage69e6a931d9611.jpg',
-    tryOnImage: '/greenish-splash.png',
-  },
-  {
     name: 'Yellowish Splash',
     price: '730.00',
     type: 'oversized',
@@ -55,14 +67,11 @@ export const TRY_TEST_PRODUCTS: Product[] = [
     tryOnImage: '/yellowish-splash.png',
   },
   {
-    name: 'The Maverick Phoenix',
+    name: 'Greenish Splash',
     price: '730.00',
     type: 'oversized',
-    image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e69abfcec21productimage69e69a06054c4.jpg',
-    variants: [
-      { colorName: 'Dark Black', tryOnImage: '/maverick-phoenix-black.png' },
-      { colorName: 'White Base', tryOnImage: '/maverick-phoenix-white.png' },
-    ],
+    image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e6aa596ae5cproductimage69e6a931d9611.jpg',
+    tryOnImage: '/greenish-splash.png',
   },
   {
     name: 'Cyber Crescent',
@@ -70,16 +79,40 @@ export const TRY_TEST_PRODUCTS: Product[] = [
     type: 'oversized',
     image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e6a659a24b7productimage69e6a59ddf53b.jpg',
     tryOnImage: '/cyber-crescent.png',
-  }
+  },
+  {
+    name: 'Black Flux Sweatpants',
+    price: '660.00',
+    oldPrice: '1400.00',
+    type: 'pants',
+    image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e75f1c28fccproductimage699c03358e601.jpg',
+    tryOnImage: '/black-flux-sweatpants.png',
+  },
+  {
+    name: 'Light Code Sweatpants',
+    price: '660.00',
+    oldPrice: '1300.00',
+    type: 'pants',
+    image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/699d9be7c3129productimage699c03358e605.jpg',
+    tryOnImage: '/light-code-sweatpants.png',
+  },
 ]
 
 export const PREORDER_PRODUCT: Product = {
   name: 'Eternity Protocol',
   price: '730.00',
   type: 'oversized',
-  image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e14821423d8productimage69e14759939d1.jpg',
+  image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-null,h-null//products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg',
   variants: [
-    { colorName: 'White', tryOnImage: '/eternity-protocol-white.png' },
-    { colorName: 'Navy Blue', tryOnImage: '/eternity-protocol-navy.png' },
+    { 
+      colorName: 'White Base', 
+      tryOnImage: '/eternity-protocol-white.png',
+      url: 'https://ik.imagekit.io/5yvgym2qm/tr:w-null,h-null//products/696e0bcb55259/69e1482142676productimage69e14759939d1.jpg'
+    },
+    { 
+      colorName: 'Navy Blue', 
+      tryOnImage: '/eternity-protocol-navy.png',
+      url: 'https://ik.imagekit.io/5yvgym2qm/tr:w-null,h-null//products/696e0bcb55259/69e1482150dd4productimage69e14759939d1.jpg'
+    },
   ],
 }
