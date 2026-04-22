@@ -1,9 +1,9 @@
-import type { Metadata } from 'next'
 import './globals.css'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'SWAY STUDIO | AI Streetwear Fitting',
-  description: 'AI-Powered Streetwear Fitting for Sway Maverick',
+  title: 'SWAY STUDIO | AERO Collection',
+  description: 'AI Powered Virtual Fitting Room',
 }
 
 export default function RootLayout({
@@ -13,9 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-black antialiased selection:bg-cyan-400 selection:text-black">
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
