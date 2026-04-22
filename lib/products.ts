@@ -1,8 +1,7 @@
-// lib/products.ts
-
+// 1. Define the Type
 export type SizeOption = 'S' | 'M' | 'L' | 'XL' | '2XL'
 
-// Add this so your page.tsx can map through the sizes!
+// 2. Export the actual ARRAY for the UI (Crucial for page.tsx)
 export const SIZES: SizeOption[] = ['S', 'M', 'L', 'XL', '2XL']
 
 export type ProductVariant = {
@@ -20,6 +19,7 @@ export type Product = {
   variants?: ProductVariant[]
 }
 
+// 3. Export the Products List
 export const TRY_TEST_PRODUCTS: Product[] = [
   {
     name: 'The Powder Blue Venture Tee',
@@ -79,6 +79,7 @@ export const TRY_TEST_PRODUCTS: Product[] = [
   },
 ]
 
+// 4. Export Preorder
 export const PREORDER_PRODUCT: Product = {
   name: 'Eternity Protocol',
   price: '730',
@@ -95,6 +96,7 @@ export const PREORDER_PRODUCT: Product = {
   ],
 }
 
+// 5. Export Contact Links
 export const CONTACT_LINKS = {
   whatsapp: 'https://api.whatsapp.com/send?phone=201033866838',
   instagram: 'https://www.instagram.com/swaymaverick',
