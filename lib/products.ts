@@ -1,27 +1,18 @@
-// lib/products.ts
-
 export type SizeOption = 'S' | 'M' | 'L' | 'XL' | '2XL'
-
-export type ProductType = 'regular' | 'oversized'
-
-export type ProductVariant = {
-  colorName: string
-  url: string
-  tryOnImage: string
-}
 
 export type Product = {
   name: string
   price: string
   image: string
-  type: ProductType
+  type: 'regular' | 'oversized'
   tryOnImage?: string
-  variants?: ProductVariant[]
+  variants?: { colorName: string; tryOnImage: string }[]
 }
+
+export const SIZES: SizeOption[] = ['S', 'M', 'L', 'XL', '2XL']
 
 export const CONTACT_LINKS = {
   whatsapp: 'https://api.whatsapp.com/send?phone=201033866838',
-  instagram: 'https://www.instagram.com/swaymaverick',
 }
 
 export const TRY_TEST_PRODUCTS: Product[] = [
@@ -30,7 +21,7 @@ export const TRY_TEST_PRODUCTS: Product[] = [
     price: '440.00',
     type: 'regular',
     image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e6b889925deproductimage69e6b51508e46.jpg',
-    tryOnImage: '/maverick-phoenix-white.png',
+    tryOnImage: '/powder-blue-venture-tee.png',
   },
   {
     name: 'The Catalyst Tee',
@@ -66,8 +57,8 @@ export const TRY_TEST_PRODUCTS: Product[] = [
     type: 'oversized',
     image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e69abfcec21productimage69e69a06054c4.jpg',
     variants: [
-      { colorName: 'Dark Black', url: '...', tryOnImage: '/maverick-phoenix-black.png' },
-      { colorName: 'White Base', url: '...', tryOnImage: '/maverick-phoenix-white.png' },
+      { colorName: 'Dark Black', tryOnImage: '/maverick-phoenix-black.png' },
+      { colorName: 'White Base', tryOnImage: '/maverick-phoenix-white.png' },
     ],
   },
   {
@@ -78,14 +69,3 @@ export const TRY_TEST_PRODUCTS: Product[] = [
     tryOnImage: '/cyber-crescent.png',
   }
 ]
-
-export const PREORDER_PRODUCT: Product = {
-  name: 'Eternity Protocol',
-  price: '730.00',
-  type: 'oversized',
-  image: 'https://ik.imagekit.io/5yvgym2qm/tr:w-1000,h-1500/products/696e0bcb55259/69e14821423d8productimage69e14759939d1.jpg',
-  variants: [
-    { colorName: 'White', url: '...', tryOnImage: '/maverick-phoenix-white.png' },
-    { colorName: 'Navy Blue', url: '...', tryOnImage: '/maverick-phoenix-black.png' },
-  ],
-}
