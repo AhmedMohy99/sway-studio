@@ -13,5 +13,5 @@ body {
   background-color: #000000 !important;
   margin: 0;
   padding: 0;
-  -webkit-font-smoothing: antialiased;
+  font-family: Arial, sans-serif;
 }
