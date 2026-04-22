@@ -3,27 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --background: #080808;
+  --background: #000000;
   --foreground: #ffffff;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  /* This prevents the white flash when loading */
-  background-color: #080808 !important;
+  background-color: #000000 !important;
   margin: 0;
   padding: 0;
-}
-
-/* Custom Scrollbar to match the theme */
-::-webkit-scrollbar {
-  width: 5px;
-}
-::-webkit-scrollbar-track {
-  background: #080808;
-}
-::-webkit-scrollbar-thumb {
-  background: #22d3ee;
-  border-radius: 10px;
+  -webkit-font-smoothing: antialiased;
 }
