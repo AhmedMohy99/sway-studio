@@ -5,159 +5,151 @@ import {
   TRY_TEST_PRODUCTS,
   PREORDER_PRODUCT,
   CONTACT_LINKS,
-  SIZES, 
   type Product,
   type SizeOption,
+  type ProductType
 } from '@/lib/products'
 import TryOnEngine from '@/components/TryOnEngine'
-import SizeGuide from '@/components/SizeGuide'
 
 export default function Home() {
-  const [activeSection, setActiveSection] = useState<'try-test' | 'preorder'>('try-test')
   const [tryOnOpen, setTryOnOpen] = useState(false)
-  const [tryOnProduct, setTryOnProduct] = useState<Product | null>(null)
-  const [tryOnImage, setTryOnImage] = useState('')
-  const [tryOnSize, setTryOnSize] = useState<SizeOption>('L')
-  const [mode, setMode] = useState<'camera' | 'upload'>('camera')
-  const [userImg, setUserImg] = useState<string | null>(null)
-  const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
+  const [activeProduct, setActiveProduct] = useState<Product | null>(null)
+  const [selectedImage, setSelectedImage] = useState('')
+  const [selectedSize, setSelectedSize] = useState<SizeOption>('L')
+  const [showSizeGuide, setShowSizeGuide] = useState(false)
 
-  useEffect(() => {
-    document.body.style.overflow = tryOnOpen ? 'hidden' : 'unset'
-  }, [tryOnOpen])
+  const REGULAR_SIZES: SizeOption[] = ['S', 'M', 'L', 'XL', '2XL']
+  const OVERSIZED_SIZES: SizeOption[] = ['S', 'M', 'L', 'XL']
 
   const openTryOn = (prod: Product) => {
-    setTryOnProduct(prod)
-    setTryOnImage(prod.variants ? prod.variants[0].tryOnImage : (prod.tryOnImage || prod.image))
+    setActiveProduct(prod)
+    setSelectedImage(prod.variants ? prod.variants[0].tryOnImage : (prod.tryOnImage || prod.image))
+    setSelectedSize('L')
     setTryOnOpen(true)
-  }
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setUserImg(URL.createObjectURL(file))
-      setMode('upload')
-    }
   }
 
   return (
     <main className="min-h-screen bg-black text-white font-sans selection:bg-cyan-400 selection:text-black">
       
-      {/* HEADER EXACTLY AS VIDEO */}
-      <div className="flex justify-between items-center px-6 py-6 pt-10">
-        <div className="flex flex-col">
-          <h1 className="text-3xl font-black italic text-cyan-400 tracking-tighter leading-none">SWAY STUDIO</h1>
-          <span className="text-[9px] text-zinc-500 tracking-[0.3em] uppercase mt-1">AI Powered Fitting</span>
+      {/* --- TOP BANNER --- */}
+      <div className="bg-cyan-400 text-black py-1 px-4 flex justify-between items-center overflow-hidden whitespace-nowrap">
+        <span className="text-[9px] font-bold uppercase tracking-widest animate-pulse">Crafted For The Maverick</span>
+        <span className="text-[9px] font-bold uppercase tracking-widest hidden md:block">Designed for those who CREATE THEIR OWN RULES</span>
+      </div>
+
+      {/* --- NAVBAR --- */}
+      <nav className="flex items-center justify-between px-6 py-6 border-b border-white/5">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-cyan-400 rounded-lg flex items-center justify-center font-black text-black text-xs">S</div>
+          <h1 className="text-xl font-black italic tracking-tighter uppercase text-cyan-400">SWAY</h1>
         </div>
-        <a 
-          href={CONTACT_LINKS.whatsapp} 
-          className="bg-cyan-400 text-black px-6 py-2.5 rounded-full font-black text-[10px] tracking-widest shadow-[0_0_20px_rgba(34,211,238,0.4)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)] transition-all"
-        >
-          WHATSAPP
-        </a>
+        <div className="hidden lg:flex gap-8 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+          <button className="hover:text-white transition">Home</button>
+          <button className="hover:text-white transition">Shop</button>
+          <button className="hover:text-white transition">Our Story</button>
+          <button onClick={() => setShowSizeGuide(true)} className="text-cyan-400">Size Guide</button>
+        </div>
+        <div className="flex items-center gap-5">
+           <button className="text-zinc-400 text-lg">🔍</button>
+           <button className="text-zinc-400 text-lg">🛒</button>
+           <button className="text-zinc-400 text-lg">👤</button>
+        </div>
+      </nav>
+
+      {/* --- HERO SECTION --- */}
+      <div className="py-12 text-center">
+        <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-4 italic">
+          AERO <span className="text-zinc-800">Collection</span>
+        </h2>
       </div>
 
-      {/* TABS EXACTLY AS VIDEO */}
-      <div className="flex justify-center gap-4 mt-6">
-        <button 
-          onClick={() => setActiveSection('try-test')} 
-          className={`px-8 py-3 rounded-full font-black text-[10px] tracking-widest transition-all ${
-            activeSection === 'try-test' 
-              ? 'bg-cyan-400 text-black shadow-[0_0_20px_rgba(34,211,238,0.4)]' 
-              : 'border border-zinc-800 text-zinc-600'
-          }`}
-        >
-          TRY & TEST
-        </button>
-        <button 
-          onClick={() => setActiveSection('preorder')} 
-          className={`px-8 py-3 rounded-full font-black text-[10px] tracking-widest transition-all ${
-            activeSection === 'preorder' 
-              ? 'bg-cyan-400 text-black shadow-[0_0_20px_rgba(34,211,238,0.4)]' 
-              : 'border border-zinc-800 text-zinc-600'
-          }`}
-        >
-          PRE ORDER
-        </button>
-      </div>
-
-      {/* SECTION TITLE */}
-      <div className="flex flex-col items-center mt-16 mb-10">
-         <h2 className="text-3xl font-black italic uppercase tracking-wide">
-           {activeSection === 'try-test' ? 'TRY & TEST' : 'PRE ORDER'}
-         </h2>
-         <div className="w-16 h-1 bg-cyan-400 mt-2 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
-      </div>
-
-      {/* PRODUCT GRID */}
-      <div className="px-6 flex flex-col gap-16 max-w-md mx-auto pb-32">
-        {(activeSection === 'try-test' ? TRY_TEST_PRODUCTS : [PREORDER_PRODUCT]).map((prod) => (
-          <div key={prod.name} className="flex flex-col items-center">
-            
-            {/* PRODUCT CARD WITH OVERLAY BUTTON */}
-            <div className="w-full bg-white rounded-[40px] overflow-hidden relative shadow-2xl">
-              <img src={prod.image} alt={prod.name} className="w-full object-cover aspect-[4/5]" />
-              <div className="absolute bottom-5 left-5 right-5">
-                <button 
-                  onClick={() => openTryOn(prod)} 
-                  className="w-full bg-white text-black py-4 rounded-[20px] font-black text-[11px] tracking-[0.2em] uppercase shadow-xl hover:bg-zinc-100 transition-colors"
-                >
-                  LAUNCH AI STUDIO
-                </button>
-              </div>
+      {/* --- PRODUCT GRID --- */}
+      <div className="px-6 grid grid-cols-1 md:grid-cols-3 gap-y-16 gap-x-8 max-w-7xl mx-auto pb-32">
+        {TRY_TEST_PRODUCTS.map((prod) => (
+          <div key={prod.name} className="flex flex-col items-center group">
+            <div className="relative w-full aspect-[3/4] bg-zinc-900 rounded-sm overflow-hidden mb-4 shadow-2xl">
+              <img src={prod.image} alt={prod.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              <button 
+                onClick={() => openTryOn(prod)}
+                className="absolute inset-x-6 bottom-6 bg-white/90 backdrop-blur-md text-black py-4 rounded-full text-[10px] font-black uppercase opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"
+              >
+                Launch AI Studio
+              </button>
+              <div className="absolute top-4 right-4 w-8 h-8 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-cyan-400 text-xs border border-white/10">♡</div>
             </div>
-
-            {/* PRODUCT TEXT */}
-            <h3 className="mt-6 text-[12px] font-bold text-white tracking-[0.15em] uppercase text-center">
-              {prod.name}
-            </h3>
-            <p className="text-cyan-400 font-black text-xl mt-1 tracking-wider">
-              EGP {prod.price}
-            </p>
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-300 text-center mb-1">{prod.name}</h3>
+            <p className="text-[10px] font-black text-cyan-400 uppercase">EGP {prod.price}</p>
           </div>
         ))}
       </div>
 
-      {/* AI MODAL (Kept intact with the camera/upload logic) */}
-      {tryOnOpen && tryOnProduct && (
+      {/* --- SIZE GUIDE MODAL --- */}
+      {showSizeGuide && (
+        <div className="fixed inset-0 z-[110] bg-black/95 backdrop-blur-xl flex items-center justify-center p-6">
+          <div className="w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-white/5 flex justify-between items-center">
+               <h3 className="text-xl font-black italic uppercase text-cyan-400">Size Matrix</h3>
+               <button onClick={() => setShowSizeGuide(false)} className="text-zinc-500 hover:text-white">✕</button>
+            </div>
+            <div className="p-8 overflow-y-auto max-h-[70vh]">
+               {/* REGULAR TABLE */}
+               <div className="mb-10">
+                 <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4">Regular Fit (Venture / Bluish)</h4>
+                 <table className="w-full text-center border-collapse border border-white/10 text-sm">
+                   <thead className="bg-white text-black font-black uppercase text-[10px]">
+                     <tr><th className="p-3">Size</th><th className="p-3">Width (عرض)</th><th className="p-3">Length (طول)</th></tr>
+                   </thead>
+                   <tbody className="text-zinc-400">
+                     <tr className="border-b border-white/5"><td>S</td><td>52</td><td>68</td></tr>
+                     <tr className="border-b border-white/5"><td>M</td><td>54</td><td>70</td></tr>
+                     <tr className="border-b border-white/5"><td>L</td><td>56</td><td>72</td></tr>
+                     <tr className="border-b border-white/5"><td>XL</td><td>58</td><td>74</td></tr>
+                     <tr><td>2XL</td><td>60</td><td>76</td></tr>
+                   </tbody>
+                 </table>
+               </div>
+
+               {/* OVERSIZED TABLE */}
+               <div>
+                 <h4 className="text-[10px] font-black uppercase tracking-widest text-cyan-400 mb-4">Oversized Fit (Phoenix / Catalyst / Others)</h4>
+                 <table className="w-full text-center border-collapse border border-white/10 text-sm">
+                   <thead className="bg-cyan-400 text-black font-black uppercase text-[10px]">
+                     <tr><th className="p-3">Size</th><th className="p-3">Width (عرض)</th><th className="p-3">Length (طول)</th></tr>
+                   </thead>
+                   <tbody className="text-zinc-400">
+                     <tr className="border-b border-white/5"><td>S</td><td>54</td><td>72.5</td></tr>
+                     <tr className="border-b border-white/5"><td>M</td><td>57</td><td>73.5</td></tr>
+                     <tr className="border-b border-white/5"><td>L</td><td>60</td><td>74.5</td></tr>
+                     <tr><td>XL</td><td>63</td><td>76.5</td></tr>
+                   </tbody>
+                 </table>
+               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- TRY-ON STUDIO MODAL --- */}
+      {tryOnOpen && activeProduct && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center p-6 overflow-y-auto">
-          <div className="w-full max-w-md flex justify-between items-center mb-6 pt-4">
-            <h2 className="text-xl font-black italic uppercase text-cyan-400 tracking-tighter">{tryOnProduct.name}</h2>
-            <button onClick={() => setTryOnOpen(false)} className="text-zinc-500 hover:text-white text-2xl font-light">✕</button>
+          <div className="w-full max-w-xl flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-black italic uppercase tracking-tighter">{activeProduct.name}</h2>
+            <button onClick={() => setTryOnOpen(false)} className="w-12 h-12 flex items-center justify-center rounded-full border border-white/10 text-zinc-500">✕</button>
           </div>
 
-          <div className="flex gap-3 mb-6 w-full max-w-md bg-zinc-900 p-1.5 rounded-full border border-zinc-800">
-            <button onClick={() => setMode('camera')} className={`flex-1 py-3 rounded-full text-[10px] font-black uppercase transition-all ${mode === 'camera' ? 'bg-cyan-400 text-black shadow-[0_0_15px_rgba(34,211,238,0.3)]' : 'text-zinc-500'}`}>Live Camera</button>
-            <label className={`flex-1 py-3 text-center rounded-full text-[10px] font-black uppercase cursor-pointer transition-all ${mode === 'upload' ? 'bg-cyan-400 text-black shadow-[0_0_15px_rgba(34,211,238,0.3)]' : 'text-zinc-500'}`}>
-              Upload Photo
-              <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
-            </label>
+          {/* ENGINE CANVAS */}
+          <div className="w-full max-w-md aspect-[3/4] bg-zinc-900 rounded-[48px] overflow-hidden border border-white/10 relative shadow-2xl shadow-cyan-400/5">
+             <TryOnEngine itemUrl={selectedImage} selectedSize={selectedSize} />
           </div>
 
-          <div className="w-full max-w-md aspect-[3/4] rounded-[40px] overflow-hidden bg-zinc-900 border border-zinc-800 relative shadow-2xl">
-            {mode === 'camera' ? (
-              <TryOnEngine itemUrl={tryOnImage} selectedSize={tryOnSize} />
-            ) : (
-              <div className="relative w-full h-full flex items-center justify-center bg-zinc-950">
-                {userImg ? (
-                  <>
-                    <img src={userImg} className="w-full h-full object-cover" />
-                    <img src={tryOnImage} className="absolute inset-0 w-full h-full object-contain p-12 drop-shadow-2xl" />
-                  </>
-                ) : (
-                  <p className="text-zinc-600 text-[10px] uppercase font-black tracking-widest">Select a photo from gallery</p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {tryOnProduct.variants && (
-            <div className="mt-6 flex gap-3 w-full max-w-md">
-              {tryOnProduct.variants.map(v => (
+          {/* COLOR PICKER (IF APPLICABLE) */}
+          {activeProduct.variants && (
+            <div className="mt-8 flex gap-3">
+              {activeProduct.variants.map(v => (
                 <button 
                   key={v.colorName} 
-                  onClick={() => setTryOnImage(v.tryOnImage)}
-                  className={`flex-1 py-3 rounded-full text-[10px] font-black uppercase border-2 transition-all ${tryOnImage === v.tryOnImage ? 'border-cyan-400 text-cyan-400' : 'border-zinc-800 text-zinc-600'}`}
+                  onClick={() => setSelectedImage(v.tryOnImage)}
+                  className={`px-5 py-2 rounded-full text-[10px] font-black uppercase border-2 transition-all ${selectedImage === v.tryOnImage ? 'border-cyan-400 text-cyan-400 bg-cyan-400/5' : 'border-white/10 text-zinc-600'}`}
                 >
                   {v.colorName}
                 </button>
@@ -165,20 +157,32 @@ export default function Home() {
             </div>
           )}
 
-          <div className="mt-6 flex gap-2 w-full max-w-md justify-between">
-            {SIZES.map(s => (
-              <button key={s} onClick={() => setTryOnSize(s)} className={`w-14 h-14 rounded-2xl font-black text-sm transition-all ${tryOnSize === s ? 'bg-cyan-400 text-black shadow-[0_0_15px_rgba(34,211,238,0.4)]' : 'bg-zinc-900 text-zinc-600 border border-zinc-800 hover:text-white'}`}>{s}</button>
+          {/* SIZE PICKER (CORRECTED BY TYPE) */}
+          <div className="mt-8 flex gap-2">
+            {(activeProduct.type === 'regular' ? REGULAR_SIZES : OVERSIZED_SIZES).map(s => (
+              <button 
+                key={s} 
+                onClick={() => setSelectedSize(s)} 
+                className={`w-12 h-12 rounded-xl font-black text-xs transition-all ${selectedSize === s ? 'bg-cyan-400 text-black shadow-lg shadow-cyan-400/20' : 'bg-zinc-900 text-zinc-700 border border-white/5'}`}
+              >
+                {s}
+              </button>
             ))}
           </div>
 
           <button 
-            onClick={() => window.open(`${CONTACT_LINKS.whatsapp}&text=Order: ${tryOnProduct.name} Size: ${tryOnSize}`)} 
-            className="mt-8 mb-10 w-full max-w-md bg-white text-black py-5 rounded-[20px] font-black uppercase text-[11px] tracking-widest shadow-2xl hover:bg-cyan-400 transition-colors"
+             onClick={() => window.open(`${CONTACT_LINKS.whatsapp}&text=I want to order ${activeProduct.name} in size ${selectedSize}`)}
+             className="mt-10 w-full max-w-md bg-white text-black py-6 rounded-full font-black uppercase text-xs shadow-2xl hover:bg-cyan-400 transition-all active:scale-95"
           >
             Confirm Order via WhatsApp
           </button>
         </div>
       )}
+
+      {/* FLOATING WHATSAPP */}
+      <a href={CONTACT_LINKS.whatsapp} className="fixed bottom-6 right-6 w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center text-white text-2xl shadow-2xl hover:scale-110 transition-transform">
+        💬
+      </a>
     </main>
   )
 }
