@@ -2,7 +2,7 @@
 
 export type SizeOption = 'S' | 'M' | 'L' | 'XL' | '2XL'
 
-// This is the actual array the page needs to loop through for the buttons
+// This is the actual array for the buttons
 export const SIZES: SizeOption[] = ['S', 'M', 'L', 'XL', '2XL']
 
 export type ProductVariant = {
