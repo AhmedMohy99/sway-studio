@@ -9,8 +9,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // This is your signature SWAY color
         cyan: {
-          400: '#22d3ee',
+          400: '#22d3ee', 
+          500: '#06b6d4',
+        },
+        zinc: {
+          950: '#080808', // Your deep black background
         }
       },
     },
